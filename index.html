@@ -571,11 +571,28 @@
         let streakCount = 0;
         let totalStudyDays = 0;
         let progressChart, dailyChart;
+        let currentUser = null;
+        let isOnline = navigator.onLine;
+
+        // 云端同步配置
+        const API_BASE_URL = 'https://ftracker.teresascottr45677927.workers.dev'; // 稍后会替换
+        
+        // 检查网络状态
+        window.addEventListener('online', () => {
+            isOnline = true;
+            if (currentUser) {
+                syncToCloud();
+            }
+        });
+        
+        window.addEventListener('offline', () => {
+            isOnline = false;
+        });
 
         // 初始化
-        function init() {
+        async function init() {
             try {
-                loadData();
+                await loadData(); // 改为异步加载
                 updateAllProgress();
                 
                 // 延迟初始化图表，确保DOM完全加载
@@ -591,28 +608,203 @@
             }
         }
 
-        // 加载数据
-        function loadData() {
-            const savedData = localStorage.getItem('frenchLearningData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                Object.assign(config, data.config);
-                dailyCheckins = data.dailyCheckins || {};
-                streakCount = data.streakCount || 0;
-                totalStudyDays = data.totalStudyDays || 0;
+        // 加载数据（本地 + 云端）
+        async function loadData() {
+            try {
+                // 先加载本地数据
+                const savedData = localStorage.getItem('frenchLearningData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    Object.assign(config, data.config);
+                    dailyCheckins = data.dailyCheckins || {};
+                    streakCount = data.streakCount || 0;
+                    totalStudyDays = data.totalStudyDays || 0;
+                    currentUser = data.currentUser || null;
+                }
+
+                // 检查是否有用户ID，如果有则从云端同步
+                if (currentUser && isOnline) {
+                    await syncFromCloud();
+                } else if (!currentUser) {
+                    // 首次使用，提示设置用户ID
+                    setTimeout(showUserIdPrompt, 1000);
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
             }
         }
 
-        // 保存数据
-        function saveData() {
+        // 保存数据（本地 + 云端）
+        async function saveData() {
             const data = {
                 config,
                 dailyCheckins,
                 streakCount,
                 totalStudyDays,
+                currentUser,
                 lastSave: new Date().toISOString()
             };
+            
+            // 保存到本地
             localStorage.setItem('frenchLearningData', JSON.stringify(data));
+            
+            // 同步到云端
+            if (currentUser && isOnline) {
+                await syncToCloud();
+            }
+        }
+
+        // 从云端同步数据
+        async function syncFromCloud() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                showSyncStatus('正在从云端同步数据...', 'loading');
+                
+                const response = await fetch(`${API_BASE_URL}/api/data/${currentUser}`);
+                
+                if (response.ok) {
+                    const cloudData = await response.json();
+                    
+                    if (cloudData && cloudData.config) {
+                        // 合并云端数据
+                        Object.assign(config, cloudData.config);
+                        dailyCheckins = { ...dailyCheckins, ...cloudData.dailyCheckins };
+                        streakCount = Math.max(streakCount, cloudData.streakCount || 0);
+                        totalStudyDays = Math.max(totalStudyDays, cloudData.totalStudyDays || 0);
+                        
+                        // 保存到本地
+                        localStorage.setItem('frenchLearningData', JSON.stringify({
+                            config, dailyCheckins, streakCount, totalStudyDays, currentUser,
+                            lastSync: new Date().toISOString()
+                        }));
+                        
+                        updateAllProgress();
+                        showSyncStatus('✅ 数据同步成功', 'success');
+                    }
+                } else if (response.status === 404) {
+                    // 云端没有数据，这是正常的（新用户）
+                    showSyncStatus('云端暂无数据，将使用本地数据', 'info');
+                }
+            } catch (error) {
+                console.error('Sync from cloud failed:', error);
+                showSyncStatus('❌ 同步失败，使用本地数据', 'error');
+            }
+        }
+
+        // 同步数据到云端
+        async function syncToCloud() {
+            if (!currentUser || !isOnline) return;
+            
+            try {
+                showSyncStatus('正在同步到云端...', 'loading');
+                
+                const data = {
+                    config,
+                    dailyCheckins,
+                    streakCount,
+                    totalStudyDays,
+                    lastUpdate: new Date().toISOString()
+                };
+
+                const response = await fetch(`${API_BASE_URL}/api/data/${currentUser}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showSyncStatus('✅ 已同步到云端', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Sync to cloud failed:', error);
+                showSyncStatus('❌ 云端同步失败', 'error');
+            }
+        }
+
+        // 显示同步状态
+        function showSyncStatus(message, type) {
+            let statusDiv = document.getElementById('syncStatus');
+            if (!statusDiv) {
+                statusDiv = document.createElement('div');
+                statusDiv.id = 'syncStatus';
+                statusDiv.style.cssText = `
+                    position: fixed;
+                    top: 80px;
+                    right: 20px;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    z-index: 1001;
+                    transition: all 0.3s ease;
+                    max-width: 250px;
+                `;
+                document.body.appendChild(statusDiv);
+            }
+            
+            const colors = {
+                loading: { bg: '#2196F3', text: 'white' },
+                success: { bg: '#4CAF50', text: 'white' },
+                error: { bg: '#f44336', text: 'white' },
+                info: { bg: '#ff9800', text: 'white' }
+            };
+            
+            const color = colors[type] || colors.info;
+            statusDiv.style.backgroundColor = color.bg;
+            statusDiv.style.color = color.text;
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // 显示用户ID设置提示
+        function showUserIdPrompt() {
+            const userIdModal = document.createElement('div');
+            userIdModal.innerHTML = `
+                <div class="modal" style="display: block;">
+                    <div class="modal-content">
+                        <h2>🆔 设置云端同步</h2>
+                        <p>为了在所有设备间同步学习进度，请设置一个唯一的用户ID：</p>
+                        <div class="form-group">
+                            <label for="userIdInput">用户ID（建议使用邮箱或昵称）：</label>
+                            <input type="text" id="userIdInput" placeholder="例如：zhang123 或 zhang@email.com">
+                        </div>
+                        <p style="color: #666; font-size: 0.9em;">⚠️ 请记住此ID，在其他设备登录时需要输入相同ID</p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="save-btn" onclick="setUserId()" style="flex: 1;">保存并开启云端同步</button>
+                            <button onclick="skipCloudSync()" style="flex: 1; background: #ccc; color: #666;">暂时跳过</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(userIdModal);
+            
+            window.setUserId = async function() {
+                const userId = document.getElementById('userIdInput').value.trim();
+                if (!userId) {
+                    alert('请输入用户ID');
+                    return;
+                }
+                
+                currentUser = userId;
+                await saveData();
+                await syncFromCloud(); // 尝试从云端加载数据
+                userIdModal.remove();
+                showSyncStatus('✅ 云端同步已开启', 'success');
+            };
+            
+            window.skipCloudSync = function() {
+                userIdModal.remove();
+            };
         }
 
         // 检查日期重置
@@ -686,7 +878,7 @@
         }
 
         // 打卡功能
-        function checkin(type, action) {
+        async function checkin(type, action) {
             const today = new Date().toDateString();
             const buttonId = `${type}${action.charAt(0).toUpperCase() + action.slice(1)}Btn`;
             const button = document.getElementById(buttonId);
@@ -714,7 +906,7 @@
             checkDailyCompletion();
             
             localStorage.setItem('lastCheckinDate', today);
-            saveData();
+            await saveData(); // 改为异步保存
             updateAllProgress();
         }
 
@@ -949,7 +1141,7 @@
             config.duolingo.b1.completed = Math.min(parseInt(document.getElementById('duolingoB1').value) || 0, 100);
             config.duolingo.b2.completed = Math.min(parseInt(document.getElementById('duolingoB2').value) || 0, 73);
             
-            saveData();
+            saveData(); // 自动同步到云端
             updateAllProgress();
             closeSettings();
             
