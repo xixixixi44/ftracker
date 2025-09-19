@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>法语学习进度追踪器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .overview {
+            padding: 30px;
+            background: #f8f9ff;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .overview-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .overview-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .overview-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .progress-section {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+
+        .progress-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .progress-card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stage {
+            margin-bottom: 20px;
+        }
+
+        .stage-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .stage-name {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .stage-progress {
+            color: #4a90e2;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a90e2, #357abd);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .checkin-section {
+            padding: 30px;
+            background: #f8f9ff;
+        }
+
+        .checkin-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .checkin-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checkin-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkin-btn.study {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .checkin-btn.review {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+            color: white;
+        }
+
+        .checkin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .checkin-btn:active {
+            transform: translateY(0);
+        }
+
+        .checkin-btn.completed {
+            background: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+        }
+
+        .checkin-btn.completed::before {
+            content: '✓ ';
+        }
+
+        .stats-section {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .achievement {
+            background: linear-gradient(135deg, #ffd700, #ffb300);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .streak-counter {
+            background: linear-gradient(135deg, #e91e63, #c2185b);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .streak-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5em;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .save-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .save-btn:hover {
+            background: #357abd;
+        }
+
+        @media (max-width: 768px) {
+            .progress-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkin-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .overview {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="settings-btn" onclick="openSettings()">⚙️</button>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🇫🇷 法语学习进度追踪</h1>
+            <p>坚持每一天，成就更好的自己</p>
+        </div>
+
+        <div class="overview">
+            <div class="overview-card">
+                <h3>总体进度</h3>
+                <div class="number" id="totalProgress">0%</div>
+                <p>整体完成度</p>
+            </div>
+            <div class="overview-card">
+                <h3>预计剩余天数</h3>
+                <div class="number" id="remainingDays">--</div>
+                <p>按当前进度</p>
+            </div>
+            <div class="overview-card">
+                <h3>连续打卡</h3>
+                <div class="number" id="streakDays">0</div>
+                <p>天</p>
+            </div>
+            <div class="overview-card">
+                <h3>学习总天数</h3>
+                <div class="number" id="totalDays">0</div>
+                <p>天</p>
+            </div>
+        </div>
+
+        <div class="progress-section">
+            <div class="progress-card">
+                <h2>📚 上课进度</h2>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">语音</span>
+                        <span class="stage-progress" id="classPhonicsProgress">0/5</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="classPhonicsBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">A1 阶段</span>
+                        <span class="stage-progress" id="classA1Progress">0/36</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="classA1Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">A2 阶段</span>
+                        <span class="stage-progress" id="classA2Progress">0/35</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="classA2Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">B1 阶段</span>
+                        <span class="stage-progress" id="classB1Progress">0/48</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="classB1Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-card">
+                <h2>🦉 多邻国进度</h2>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">A1 阶段</span>
+                        <span class="stage-progress" id="duolingoA1Progress">0/53</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="duolingoA1Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">A2 阶段</span>
+                        <span class="stage-progress" id="duolingoA2Progress">0/46</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="duolingoA2Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">B1 阶段</span>
+                        <span class="stage-progress" id="duolingoB1Progress">0/100</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="duolingoB1Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="stage">
+                    <div class="stage-header">
+                        <span class="stage-name">B2 阶段</span>
+                        <span class="stage-progress" id="duolingoB2Progress">0/73</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="duolingoB2Bar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="checkin-section">
+            <div class="checkin-card">
+                <h2>📅 今日打卡</h2>
+                <div class="checkin-buttons">
+                    <button class="checkin-btn study" id="classStudyBtn" onclick="checkin('class', 'study')">
+                        上课学习
+                    </button>
+                    <button class="checkin-btn review" id="classReviewBtn" onclick="checkin('class', 'review')">
+                        上课复习
+                    </button>
+                    <button class="checkin-btn study" id="duolingoStudyBtn" onclick="checkin('duolingo', 'study')">
+                        多邻国学习
+                    </button>
+                    <button class="checkin-btn review" id="duolingoReviewBtn" onclick="checkin('duolingo', 'review')">
+                        多邻国复习
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="chart-container">
+                <h3>学习进度对比</h3>
+                <canvas id="progressChart" width="400" height="200"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>每日打卡统计</h3>
+                <canvas id="dailyChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 设置模态框 -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeSettings()">&times;</span>
+            <h2>⚙️ 设置初始进度</h2>
+            
+            <h3>📚 上课进度设置</h3>
+            <div class="form-group">
+                <label for="classPhonics">语音 (已完成单元数/5):</label>
+                <input type="number" id="classPhonics" min="0" max="5" value="0">
+            </div>
+            <div class="form-group">
+                <label for="classA1">A1 阶段 (已完成单元数/36):</label>
+                <input type="number" id="classA1" min="0" max="36" value="0">
+            </div>
+            <div class="form-group">
+                <label for="classA2">A2 阶段 (已完成单元数/35):</label>
+                <input type="number" id="classA2" min="0" max="35" value="0">
+            </div>
+            <div class="form-group">
+                <label for="classB1">B1 阶段 (已完成单元数/48):</label>
+                <input type="number" id="classB1" min="0" max="48" value="0">
+            </div>
+
+            <h3>🦉 多邻国进度设置</h3>
+            <div class="form-group">
+                <label for="duolingoA1">A1 阶段 (已完成单元数/53):</label>
+                <input type="number" id="duolingoA1" min="0" max="53" value="0">
+            </div>
+            <div class="form-group">
+                <label for="duolingoA2">A2 阶段 (已完成单元数/46):</label>
+                <input type="number" id="duolingoA2" min="0" max="46" value="0">
+            </div>
+            <div class="form-group">
+                <label for="duolingoB1">B1 阶段 (已完成单元数/100):</label>
+                <input type="number" id="duolingoB1" min="0" max="100" value="0">
+            </div>
+            <div class="form-group">
+                <label for="duolingoB2">B2 阶段 (已完成单元数/73):</label>
+                <input type="number" id="duolingoB2" min="0" max="73" value="0">
+            </div>
+
+            <button class="save-btn" onclick="saveSettings()">保存设置</button>
+        </div>
+    </div>
+
+    <script>
+        // 数据结构
+        const config = {
+            class: {
+                phonics: { total: 5, completed: 0 },
+                a1: { total: 36, completed: 0 },
+                a2: { total: 35, completed: 0 },
+                b1: { total: 48, completed: 0 }
+            },
+            duolingo: {
+                a1: { total: 53, completed: 0 },
+                a2: { total: 46, completed: 0 },
+                b1: { total: 100, completed: 0 },
+                b2: { total: 73, completed: 0 }
+            }
+        };
+
+        let dailyCheckins = {};
+        let streakCount = 0;
+        let totalStudyDays = 0;
+        let progressChart, dailyChart;
+
+        // 初始化
+        function init() {
+            try {
+                loadData();
+                updateAllProgress();
+                
+                // 延迟初始化图表，确保DOM完全加载
+                setTimeout(() => {
+                    initCharts();
+                    // 图表初始化后再更新一次
+                    setTimeout(updateCharts, 200);
+                }, 100);
+                
+                checkDailyReset();
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        }
+
+        // 加载数据
+        function loadData() {
+            const savedData = localStorage.getItem('frenchLearningData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.assign(config, data.config);
+                dailyCheckins = data.dailyCheckins || {};
+                streakCount = data.streakCount || 0;
+                totalStudyDays = data.totalStudyDays || 0;
+            }
+        }
+
+        // 保存数据
+        function saveData() {
+            const data = {
+                config,
+                dailyCheckins,
+                streakCount,
+                totalStudyDays,
+                lastSave: new Date().toISOString()
+            };
+            localStorage.setItem('frenchLearningData', JSON.stringify(data));
+        }
+
+        // 检查日期重置
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastCheckin = localStorage.getItem('lastCheckinDate');
+            
+            if (lastCheckin !== today) {
+                // 重置今日打卡状态
+                const todayButtons = document.querySelectorAll('.checkin-btn');
+                todayButtons.forEach(btn => {
+                    btn.classList.remove('completed');
+                    btn.disabled = false;
+                });
+            }
+        }
+
+        // 更新所有进度
+        function updateAllProgress() {
+            updateClassProgress();
+            updateDuolingoProgress();
+            updateOverview();
+            updateCharts();
+        }
+
+        // 更新上课进度
+        function updateClassProgress() {
+            const stages = ['phonics', 'a1', 'a2', 'b1'];
+            stages.forEach(stage => {
+                const { total, completed } = config.class[stage];
+                const percentage = (completed / total) * 100;
+                
+                document.getElementById(`class${stage.charAt(0).toUpperCase() + stage.slice(1)}Progress`).textContent = `${completed}/${total}`;
+                document.getElementById(`class${stage.charAt(0).toUpperCase() + stage.slice(1)}Bar`).style.width = `${percentage}%`;
+            });
+        }
+
+        // 更新多邻国进度
+        function updateDuolingoProgress() {
+            const stages = ['a1', 'a2', 'b1', 'b2'];
+            stages.forEach(stage => {
+                const { total, completed } = config.duolingo[stage];
+                const percentage = (completed / total) * 100;
+                
+                document.getElementById(`duolingo${stage.toUpperCase()}Progress`).textContent = `${completed}/${total}`;
+                document.getElementById(`duolingo${stage.toUpperCase()}Bar`).style.width = `${percentage}%`;
+            });
+        }
+
+        // 更新概览
+        function updateOverview() {
+            const classTotal = Object.values(config.class).reduce((sum, stage) => sum + stage.total, 0);
+            const classCompleted = Object.values(config.class).reduce((sum, stage) => sum + stage.completed, 0);
+            
+            const duolingoTotal = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.total, 0);
+            const duolingoCompleted = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.completed, 0);
+            
+            const totalProgress = Math.round(((classCompleted + duolingoCompleted) / (classTotal + duolingoTotal)) * 100);
+            
+            document.getElementById('totalProgress').textContent = `${totalProgress}%`;
+            document.getElementById('streakDays').textContent = streakCount;
+            document.getElementById('totalDays').textContent = totalStudyDays;
+            
+            // 计算预计剩余天数
+            const remainingClass = classTotal - classCompleted;
+            const remainingDuolingo = duolingoTotal - duolingoCompleted;
+            
+            // 简单估算：上课每天1单元，多邻国平均每天2单元
+            const estimatedDays = Math.max(remainingClass, Math.ceil(remainingDuolingo / 2));
+            document.getElementById('remainingDays').textContent = estimatedDays > 0 ? estimatedDays : '完成!';
+        }
+
+        // 打卡功能
+        function checkin(type, action) {
+            const today = new Date().toDateString();
+            const buttonId = `${type}${action.charAt(0).toUpperCase() + action.slice(1)}Btn`;
+            const button = document.getElementById(buttonId);
+            
+            if (button.classList.contains('completed')) {
+                return;
+            }
+            
+            // 标记按钮为已完成
+            button.classList.add('completed');
+            button.disabled = true;
+            
+            // 记录打卡
+            if (!dailyCheckins[today]) {
+                dailyCheckins[today] = {};
+            }
+            dailyCheckins[today][`${type}_${action}`] = true;
+            
+            // 如果是学习打卡，增加进度
+            if (action === 'study') {
+                updateStudyProgress(type);
+            }
+            
+            // 检查是否完成了今日所有任务
+            checkDailyCompletion();
+            
+            localStorage.setItem('lastCheckinDate', today);
+            saveData();
+            updateAllProgress();
+        }
+
+        // 更新学习进度
+        function updateStudyProgress(type) {
+            if (type === 'class') {
+                // 按顺序完成上课阶段
+                if (config.class.phonics.completed < config.class.phonics.total) {
+                    config.class.phonics.completed++;
+                } else if (config.class.a1.completed < config.class.a1.total) {
+                    config.class.a1.completed++;
+                } else if (config.class.a2.completed < config.class.a2.total) {
+                    config.class.a2.completed++;
+                } else if (config.class.b1.completed < config.class.b1.total) {
+                    config.class.b1.completed++;
+                }
+            } else if (type === 'duolingo') {
+                // 按顺序完成多邻国阶段
+                if (config.duolingo.a1.completed < config.duolingo.a1.total) {
+                    config.duolingo.a1.completed += Math.random() < 0.5 ? 1 : 2; // 1-2单元随机
+                    config.duolingo.a1.completed = Math.min(config.duolingo.a1.completed, config.duolingo.a1.total);
+                } else if (config.duolingo.a2.completed < config.duolingo.a2.total) {
+                    config.duolingo.a2.completed += Math.random() < 0.5 ? 1 : 2;
+                    config.duolingo.a2.completed = Math.min(config.duolingo.a2.completed, config.duolingo.a2.total);
+                } else if (config.duolingo.b1.completed < config.duolingo.b1.total) {
+                    config.duolingo.b1.completed += Math.random() < 0.5 ? 1 : 2;
+                    config.duolingo.b1.completed = Math.min(config.duolingo.b1.completed, config.duolingo.b1.total);
+                } else if (config.duolingo.b2.completed < config.duolingo.b2.total) {
+                    config.duolingo.b2.completed += 4; // B2阶段每天4单元
+                    config.duolingo.b2.completed = Math.min(config.duolingo.b2.completed, config.duolingo.b2.total);
+                }
+            }
+        }
+
+        // 检查每日完成情况
+        function checkDailyCompletion() {
+            const today = new Date().toDateString();
+            const todayCheckins = dailyCheckins[today] || {};
+            
+            const allCompleted = todayCheckins.class_study && todayCheckins.class_review && 
+                               todayCheckins.duolingo_study && todayCheckins.duolingo_review;
+            
+            if (allCompleted) {
+                streakCount++;
+                totalStudyDays++;
+                showAchievement('🎉 恭喜完成今日所有学习任务!');
+            }
+        }
+
+        // 显示成就
+        function showAchievement(message) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement';
+            achievement.textContent = message;
+            achievement.style.position = 'fixed';
+            achievement.style.top = '50%';
+            achievement.style.left = '50%';
+            achievement.style.transform = 'translate(-50%, -50%)';
+            achievement.style.zIndex = '9999';
+            
+            document.body.appendChild(achievement);
+            
+            setTimeout(() => {
+                achievement.remove();
+            }, 3000);
+        }
+
+        // 初始化图表
+        function initCharts() {
+            try {
+                const ctx1 = document.getElementById('progressChart');
+                const ctx2 = document.getElementById('dailyChart');
+                
+                if (!ctx1 || !ctx2) {
+                    console.warn('Chart canvases not found, retrying in 100ms');
+                    setTimeout(initCharts, 100);
+                    return;
+                }
+
+                // 确保 Chart.js 已加载
+                if (typeof Chart === 'undefined') {
+                    console.warn('Chart.js not loaded yet, retrying in 100ms');
+                    setTimeout(initCharts, 100);
+                    return;
+                }
+
+                const ctx1Context = ctx1.getContext('2d');
+                const ctx2Context = ctx2.getContext('2d');
+                
+                progressChart = new Chart(ctx1Context, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['上课', '多邻国'],
+                        datasets: [{
+                            data: [0, 0],
+                            backgroundColor: ['#4a90e2', '#ff9800'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                dailyChart = new Chart(ctx2Context, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: '每日打卡次数',
+                            data: [],
+                            borderColor: '#4a90e2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 4
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                console.log('Charts initialized successfully');
+            } catch (error) {
+                console.error('Error initializing charts:', error);
+                // 如果图表初始化失败，隐藏图表容器
+                const chartContainers = document.querySelectorAll('.chart-container');
+                chartContainers.forEach(container => {
+                    container.style.display = 'none';
+                });
+            }
+        }
+
+        // 更新图表
+        function updateCharts() {
+            try {
+                if (!progressChart || !dailyChart) {
+                    console.warn('Charts not initialized, skipping update');
+                    return;
+                }
+
+                // 更新进度对比图
+                const classTotal = Object.values(config.class).reduce((sum, stage) => sum + stage.total, 0);
+                const classCompleted = Object.values(config.class).reduce((sum, stage) => sum + stage.completed, 0);
+                const duolingoTotal = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.total, 0);
+                const duolingoCompleted = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.completed, 0);
+                
+                if (progressChart.data && progressChart.data.datasets && progressChart.data.datasets[0]) {
+                    progressChart.data.datasets[0].data = [
+                        Math.round((classCompleted / classTotal) * 100),
+                        Math.round((duolingoCompleted / duolingoTotal) * 100)
+                    ];
+                    progressChart.update('none'); // 使用 'none' 模式避免动画延迟
+                }
+                
+                // 更新每日打卡图表
+                const last7Days = [];
+                const checkinCounts = [];
+                const today = new Date();
+                
+                for (let i = 6; i >= 0; i--) {
+                    const date = new Date(today);
+                    date.setDate(date.getDate() - i);
+                    const dateStr = date.toDateString();
+                    const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
+                    
+                    last7Days.push(monthDay);
+                    
+                    const dayCheckins = dailyCheckins[dateStr] || {};
+                    const count = Object.keys(dayCheckins).length;
+                    checkinCounts.push(count);
+                }
+                
+                if (dailyChart.data && dailyChart.data.datasets && dailyChart.data.datasets[0]) {
+                    dailyChart.data.labels = last7Days;
+                    dailyChart.data.datasets[0].data = checkinCounts;
+                    dailyChart.update('none');
+                }
+            } catch (error) {
+                console.error('Error updating charts:', error);
+            }
+        }
+
+        // 设置相关函数
+        function openSettings() {
+            // 加载当前进度到设置界面
+            document.getElementById('classPhonics').value = config.class.phonics.completed;
+            document.getElementById('classA1').value = config.class.a1.completed;
+            document.getElementById('classA2').value = config.class.a2.completed;
+            document.getElementById('classB1').value = config.class.b1.completed;
+            
+            document.getElementById('duolingoA1').value = config.duolingo.a1.completed;
+            document.getElementById('duolingoA2').value = config.duolingo.a2.completed;
+            document.getElementById('duolingoB1').value = config.duolingo.b1.completed;
+            document.getElementById('duolingoB2').value = config.duolingo.b2.completed;
+            
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function saveSettings() {
+            // 保存上课进度
+            config.class.phonics.completed = Math.min(parseInt(document.getElementById('classPhonics').value) || 0, 5);
+            config.class.a1.completed = Math.min(parseInt(document.getElementById('classA1').value) || 0, 36);
+            config.class.a2.completed = Math.min(parseInt(document.getElementById('classA2').value) || 0, 35);
+            config.class.b1.completed = Math.min(parseInt(document.getElementById('classB1').value) || 0, 48);
+            
+            // 保存多邻国进度
+            config.duolingo.a1.completed = Math.min(parseInt(document.getElementById('duolingoA1').value) || 0, 53);
+            config.duolingo.a2.completed = Math.min(parseInt(document.getElementById('duolingoA2').value) || 0, 46);
+            config.duolingo.b1.completed = Math.min(parseInt(document.getElementById('duolingoB1').value) || 0, 100);
+            config.duolingo.b2.completed = Math.min(parseInt(document.getElementById('duolingoB2').value) || 0, 73);
+            
+            saveData();
+            updateAllProgress();
+            closeSettings();
+            
+            showAchievement('✅ 初始进度设置已保存!');
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('settingsModal');
+            if (event.target === modal) {
+                closeSettings();
+            }
+        }
+
+        // 数据导出功能
+        function exportData() {
+            const data = {
+                config,
+                dailyCheckins,
+                streakCount,
+                totalStudyDays,
+                exportDate: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `french_learning_backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // 数据导入功能
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (data.config) {
+                        Object.assign(config, data.config);
+                        dailyCheckins = data.dailyCheckins || {};
+                        streakCount = data.streakCount || 0;
+                        totalStudyDays = data.totalStudyDays || 0;
+                        
+                        saveData();
+                        updateAllProgress();
+                        showAchievement('✅ 数据导入成功!');
+                    }
+                } catch (error) {
+                    alert('导入失败，请检查文件格式');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 重置所有数据
+        function resetAllData() {
+            if (confirm('确定要重置所有数据吗？此操作不可撤销！')) {
+                localStorage.removeItem('frenchLearningData');
+                localStorage.removeItem('lastCheckinDate');
+                location.reload();
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保页面完全加载后再初始化
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+            
+            // 每小时检查一次是否需要重置日期
+            setInterval(checkDailyReset, 3600000);
+        });
+
+        // 如果页面已经加载完成，直接初始化
+        if (document.readyState !== 'loading') {
+            init();
+        }
+
+        // 键盘快捷键
+        document.addEventListener('keydown', function(event) {
+            if (event.ctrlKey || event.metaKey) {
+                switch(event.key) {
+                    case 's':
+                        event.preventDefault();
+                        openSettings();
+                        break;
+                    case 'e':
+                        event.preventDefault();
+                        exportData();
+                        break;
+                }
+            }
+            
+            // ESC键关闭模态框
+            if (event.key === 'Escape') {
+                closeSettings();
+            }
+        });
+
+        // 添加一些额外的辅助功能
+        
+        // 获取当前学习阶段
+        function getCurrentStage() {
+            // 上课当前阶段
+            let classStage = '';
+            if (config.class.phonics.completed < config.class.phonics.total) {
+                classStage = '语音';
+            } else if (config.class.a1.completed < config.class.a1.total) {
+                classStage = 'A1';
+            } else if (config.class.a2.completed < config.class.a2.total) {
+                classStage = 'A2';
+            } else if (config.class.b1.completed < config.class.b1.total) {
+                classStage = 'B1';
+            } else {
+                classStage = '已完成';
+            }
+            
+            // 多邻国当前阶段
+            let duolingoStage = '';
+            if (config.duolingo.a1.completed < config.duolingo.a1.total) {
+                duolingoStage = 'A1';
+            } else if (config.duolingo.a2.completed < config.duolingo.a2.total) {
+                duolingoStage = 'A2';
+            } else if (config.duolingo.b1.completed < config.duolingo.b1.total) {
+                duolingoStage = 'B1';
+            } else if (config.duolingo.b2.completed < config.duolingo.b2.total) {
+                duolingoStage = 'B2';
+            } else {
+                duolingoStage = '已完成';
+            }
+            
+            return { class: classStage, duolingo: duolingoStage };
+        }
+
+        // 计算学习效率
+        function calculateEfficiency() {
+            const totalPossibleDays = Object.keys(dailyCheckins).length;
+            if (totalPossibleDays === 0) return 0;
+            
+            let totalCheckins = 0;
+            Object.values(dailyCheckins).forEach(day => {
+                totalCheckins += Object.keys(day).length;
+            });
+            
+            return Math.round((totalCheckins / (totalPossibleDays * 4)) * 100);
+        }
+
+        // 预测完成时间
+        function predictCompletion() {
+            const efficiency = calculateEfficiency();
+            if (efficiency === 0) return '无法预测';
+            
+            const classRemaining = (config.class.phonics.total - config.class.phonics.completed) +
+                                 (config.class.a1.total - config.class.a1.completed) +
+                                 (config.class.a2.total - config.class.a2.completed) +
+                                 (config.class.b1.total - config.class.b1.completed);
+            
+            const duolingoRemaining = (config.duolingo.a1.total - config.duolingo.a1.completed) +
+                                    (config.duolingo.a2.total - config.duolingo.a2.completed) +
+                                    (config.duolingo.b1.total - config.duolingo.b1.completed) +
+                                    (config.duolingo.b2.total - config.duolingo.b2.completed);
+            
+            // 基于效率调整预测
+            const adjustedClassDays = Math.ceil(classRemaining / (efficiency / 100));
+            const adjustedDuolingoDays = Math.ceil(duolingoRemaining / (2 * efficiency / 100));
+            
+            return Math.max(adjustedClassDays, adjustedDuolingoDays);
+        }
+
+        // 定期更新预测
+        setInterval(() => {
+            const predicted = predictCompletion();
+            if (typeof predicted === 'number') {
+                document.getElementById('remainingDays').textContent = predicted;
+            }
+        }, 60000); // 每分钟更新一次
+    </script>
+</body>
+</html>
+                
