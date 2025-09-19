@@ -19,6 +19,111 @@
             padding: 20px;
         }
 
+        /* 登录页面样式 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+
+        .login-card p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .login-input {
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .user-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            color: #4a90e2;
+            z-index: 1000;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 80px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            z-index: 1000;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        .main-app {
+            display: none;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -263,6 +368,7 @@
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
+            z-index: 1000;
         }
 
         .settings-btn:hover {
@@ -343,6 +449,19 @@
             background: #357abd;
         }
 
+        .sync-status {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            max-width: 250px;
+            display: none;
+        }
+
         @media (max-width: 768px) {
             .progress-section {
                 grid-template-columns: 1fr;
@@ -355,154 +474,200 @@
             .overview {
                 grid-template-columns: 1fr;
             }
+
+            .user-info, .logout-btn, .settings-btn {
+                position: relative;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <button class="settings-btn" onclick="openSettings()">⚙️</button>
-    
-    <div class="container">
-        <div class="header">
-            <h1>🇫🇷 法语学习进度追踪</h1>
-            <p>坚持每一天，成就更好的自己</p>
+    <!-- 登录页面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-card">
+            <h1>🇫🇷 法语学习追踪</h1>
+            <p>请输入您的用户名登录<br>首次使用将自动创建账户</p>
+            <form class="login-form" onsubmit="handleLogin(event)">
+                <input 
+                    type="text" 
+                    id="usernameInput" 
+                    class="login-input" 
+                    placeholder="输入用户名（如：zhang123）"
+                    required
+                    minlength="3"
+                    maxlength="20"
+                    pattern="[a-zA-Z0-9@._-]+"
+                    title="用户名只能包含字母、数字、@、.、_、-"
+                >
+                <button type="submit" class="login-btn" id="loginBtn">
+                    登录 / 注册
+                </button>
+            </form>
+            <p style="font-size: 0.8em; color: #999; margin-top: 20px;">
+                💡 提示：用户名将作为您的唯一标识，请记住以便在其他设备登录
+            </p>
         </div>
+    </div>
 
-        <div class="overview">
-            <div class="overview-card">
-                <h3>总体进度</h3>
-                <div class="number" id="totalProgress">0%</div>
-                <p>整体完成度</p>
-            </div>
-            <div class="overview-card">
-                <h3>预计剩余天数</h3>
-                <div class="number" id="remainingDays">--</div>
-                <p>按当前进度</p>
-            </div>
-            <div class="overview-card">
-                <h3>连续打卡</h3>
-                <div class="number" id="streakDays">0</div>
-                <p>天</p>
-            </div>
-            <div class="overview-card">
-                <h3>学习总天数</h3>
-                <div class="number" id="totalDays">0</div>
-                <p>天</p>
-            </div>
-        </div>
+    <!-- 用户信息和登出按钮 -->
+    <div id="userInfo" class="user-info" style="display: none;">
+        👤 <span id="currentUsername"></span>
+    </div>
+    <button id="logoutBtn" class="logout-btn" style="display: none;" onclick="logout()">
+        登出
+    </button>
 
-        <div class="progress-section">
-            <div class="progress-card">
-                <h2>📚 上课进度</h2>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">语音</span>
-                        <span class="stage-progress" id="classPhonicsProgress">0/5</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="classPhonicsBar" style="width: 0%"></div>
-                    </div>
+    <!-- 主应用页面 -->
+    <div id="mainApp" class="main-app">
+        <button class="settings-btn" onclick="openSettings()">⚙️</button>
+        
+        <div class="container">
+            <div class="header">
+                <h1>🇫🇷 法语学习进度追踪</h1>
+                <p>坚持每一天，成就更好的自己</p>
+            </div>
+
+            <div class="overview">
+                <div class="overview-card">
+                    <h3>总体进度</h3>
+                    <div class="number" id="totalProgress">0%</div>
+                    <p>整体完成度</p>
                 </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">A1 阶段</span>
-                        <span class="stage-progress" id="classA1Progress">0/36</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="classA1Bar" style="width: 0%"></div>
-                    </div>
+                <div class="overview-card">
+                    <h3>预计剩余天数</h3>
+                    <div class="number" id="remainingDays">--</div>
+                    <p>按当前进度</p>
                 </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">A2 阶段</span>
-                        <span class="stage-progress" id="classA2Progress">0/35</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="classA2Bar" style="width: 0%"></div>
-                    </div>
+                <div class="overview-card">
+                    <h3>连续打卡</h3>
+                    <div class="number" id="streakDays">0</div>
+                    <p>天</p>
                 </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">B1 阶段</span>
-                        <span class="stage-progress" id="classB1Progress">0/48</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="classB1Bar" style="width: 0%"></div>
-                    </div>
+                <div class="overview-card">
+                    <h3>学习总天数</h3>
+                    <div class="number" id="totalDays">0</div>
+                    <p>天</p>
                 </div>
             </div>
 
-            <div class="progress-card">
-                <h2>🦉 多邻国进度</h2>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">A1 阶段</span>
-                        <span class="stage-progress" id="duolingoA1Progress">0/53</span>
+            <div class="progress-section">
+                <div class="progress-card">
+                    <h2>📚 上课进度</h2>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">语音</span>
+                            <span class="stage-progress" id="classPhonicsProgress">0/5</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="classPhonicsBar" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="duolingoA1Bar" style="width: 0%"></div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">A1 阶段</span>
+                            <span class="stage-progress" id="classA1Progress">0/36</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="classA1Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">A2 阶段</span>
+                            <span class="stage-progress" id="classA2Progress">0/35</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="classA2Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">B1 阶段</span>
+                            <span class="stage-progress" id="classB1Progress">0/48</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="classB1Bar" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">A2 阶段</span>
-                        <span class="stage-progress" id="duolingoA2Progress">0/46</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="duolingoA2Bar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">B1 阶段</span>
-                        <span class="stage-progress" id="duolingoB1Progress">0/100</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="duolingoB1Bar" style="width: 0%"></div>
-                    </div>
-                </div>
-                <div class="stage">
-                    <div class="stage-header">
-                        <span class="stage-name">B2 阶段</span>
-                        <span class="stage-progress" id="duolingoB2Progress">0/73</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="duolingoB2Bar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="checkin-section">
-            <div class="checkin-card">
-                <h2>📅 今日打卡</h2>
-                <div class="checkin-buttons">
-                    <button class="checkin-btn study" id="classStudyBtn" onclick="checkin('class', 'study')">
-                        上课学习
-                    </button>
-                    <button class="checkin-btn review" id="classReviewBtn" onclick="checkin('class', 'review')">
-                        上课复习
-                    </button>
-                    <button class="checkin-btn study" id="duolingoStudyBtn" onclick="checkin('duolingo', 'study')">
-                        多邻国学习
-                    </button>
-                    <button class="checkin-btn review" id="duolingoReviewBtn" onclick="checkin('duolingo', 'review')">
-                        多邻国复习
-                    </button>
+                <div class="progress-card">
+                    <h2>🦉 多邻国进度</h2>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">A1 阶段</span>
+                            <span class="stage-progress" id="duolingoA1Progress">0/53</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="duolingoA1Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">A2 阶段</span>
+                            <span class="stage-progress" id="duolingoA2Progress">0/46</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="duolingoA2Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">B1 阶段</span>
+                            <span class="stage-progress" id="duolingoB1Progress">0/100</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="duolingoB1Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage">
+                        <div class="stage-header">
+                            <span class="stage-name">B2 阶段</span>
+                            <span class="stage-progress" id="duolingoB2Progress">0/73</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="duolingoB2Bar" style="width: 0%"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="stats-section">
-            <div class="chart-container">
-                <h3>学习进度对比</h3>
-                <canvas id="progressChart" width="400" height="200"></canvas>
+            <div class="checkin-section">
+                <div class="checkin-card">
+                    <h2>📅 今日打卡</h2>
+                    <div class="checkin-buttons">
+                        <button class="checkin-btn study" id="classStudyBtn" onclick="checkin('class', 'study')">
+                            上课学习
+                        </button>
+                        <button class="checkin-btn review" id="classReviewBtn" onclick="checkin('class', 'review')">
+                            上课复习
+                        </button>
+                        <button class="checkin-btn study" id="duolingoStudyBtn" onclick="checkin('duolingo', 'study')">
+                            多邻国学习
+                        </button>
+                        <button class="checkin-btn review" id="duolingoReviewBtn" onclick="checkin('duolingo', 'review')">
+                            多邻国复习
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="chart-container">
-                <h3>每日打卡统计</h3>
-                <canvas id="dailyChart" width="400" height="200"></canvas>
+
+            <div class="stats-section">
+                <div class="chart-container">
+                    <h3>学习进度对比</h3>
+                    <canvas id="progressChart" width="400" height="200"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>每日打卡统计</h3>
+                    <canvas id="dailyChart" width="400" height="200"></canvas>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- 同步状态提示 -->
+    <div id="syncStatus" class="sync-status"></div>
 
     <!-- 设置模态框 -->
     <div id="settingsModal" class="modal">
@@ -574,12 +739,13 @@
         let currentUser = null;
         let isOnline = navigator.onLine;
 
-        // 云端同步配置
-        const API_BASE_URL = 'https://ftracker.teresascottr45677927.workers.dev'; // 稍后会替换
+        // 云端同步配置 - 在这里替换你的Worker URL
+        const API_BASE_URL = 'https://ftracker.teresascottr45677927.workers.dev';
         
         // 检查网络状态
         window.addEventListener('online', () => {
             isOnline = true;
+            showSyncStatus('网络已连接', 'success');
             if (currentUser) {
                 syncToCloud();
             }
@@ -587,69 +753,137 @@
         
         window.addEventListener('offline', () => {
             isOnline = false;
+            showSyncStatus('网络已断开，数据将保存在本地', 'info');
         });
 
-        // 初始化
-        async function init() {
+        // 登录处理
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('usernameInput').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+            
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+
+            // 验证用户名格式
+            const validPattern = /^[a-zA-Z0-9@._-]+$/;
+            if (!validPattern.test(username)) {
+                alert('用户名只能包含字母、数字、@、.、_、-');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+
             try {
-                await loadData(); // 改为异步加载
-                updateAllProgress();
+                // 保存用户名到本地
+                currentUser = username;
+                localStorage.setItem('currentUser', username);
                 
-                // 延迟初始化图表，确保DOM完全加载
-                setTimeout(() => {
-                    initCharts();
-                    // 图表初始化后再更新一次
-                    setTimeout(updateCharts, 200);
-                }, 100);
+                // 尝试从云端加载数据
+                await loadUserData();
                 
-                checkDailyReset();
+                // 切换到主应用
+                showMainApp();
+                
             } catch (error) {
-                console.error('Error during initialization:', error);
+                console.error('Login error:', error);
+                alert('登录失败，请重试');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录 / 注册';
             }
         }
 
-        // 加载数据（本地 + 云端）
-        async function loadData() {
+        // 显示主应用
+        function showMainApp() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('userInfo').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'block';
+            document.getElementById('currentUsername').textContent = currentUser;
+            
+            // 初始化主应用
+            initMainApp();
+        }
+
+        // 显示登录页
+        function showLoginPage() {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+        }
+
+        // 登出
+        function logout() {
+            if (confirm('确定要登出吗？本地数据将保留。')) {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                showLoginPage();
+                document.getElementById('usernameInput').value = '';
+            }
+        }
+
+        // 加载用户数据
+        async function loadUserData() {
             try {
                 // 先加载本地数据
-                const savedData = localStorage.getItem('frenchLearningData');
-                if (savedData) {
+                await loadLocalData();
+                
+                // 然后尝试从云端同步
+                if (isOnline && API_BASE_URL !== 'https://your-worker-name.your-subdomain.workers.dev') {
+                    await syncFromCloud();
+                } else {
+                    showSyncStatus('使用本地数据（云端同步未配置）', 'info');
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showSyncStatus('数据加载失败，使用默认数据', 'error');
+            }
+        }
+
+        // 加载本地数据
+        async function loadLocalData() {
+            const userDataKey = `frenchLearningData_${currentUser}`;
+            const savedData = localStorage.getItem(userDataKey);
+            
+            if (savedData) {
+                try {
                     const data = JSON.parse(savedData);
-                    Object.assign(config, data.config);
+                    Object.assign(config, data.config || {});
                     dailyCheckins = data.dailyCheckins || {};
                     streakCount = data.streakCount || 0;
                     totalStudyDays = data.totalStudyDays || 0;
-                    currentUser = data.currentUser || null;
+                    showSyncStatus('本地数据加载成功', 'success');
+                } catch (error) {
+                    console.error('Error parsing local data:', error);
+                    showSyncStatus('本地数据损坏，使用默认设置', 'error');
                 }
-
-                // 检查是否有用户ID，如果有则从云端同步
-                if (currentUser && isOnline) {
-                    await syncFromCloud();
-                } else if (!currentUser) {
-                    // 首次使用，提示设置用户ID
-                    setTimeout(showUserIdPrompt, 1000);
-                }
-            } catch (error) {
-                console.error('Error loading data:', error);
+            } else {
+                showSyncStatus('新用户，使用默认设置', 'info');
             }
         }
 
         // 保存数据（本地 + 云端）
-        async function saveData() {
+        async function saveUserData() {
+            if (!currentUser) return;
+            
             const data = {
                 config,
                 dailyCheckins,
                 streakCount,
                 totalStudyDays,
-                currentUser,
                 lastSave: new Date().toISOString()
             };
             
-            // 保存到本地
-            localStorage.setItem('frenchLearningData', JSON.stringify(data));
+            // 保存到本地（按用户名分别保存）
+            const userDataKey = `frenchLearningData_${currentUser}`;
+            localStorage.setItem(userDataKey, JSON.stringify(data));
             
             // 同步到云端
-            if (currentUser && isOnline) {
+            if (isOnline && API_BASE_URL !== 'https://your-worker-name.your-subdomain.workers.dev') {
                 await syncToCloud();
             }
         }
@@ -661,34 +895,37 @@
             try {
                 showSyncStatus('正在从云端同步数据...', 'loading');
                 
-                const response = await fetch(`${API_BASE_URL}/api/data/${currentUser}`);
+                const response = await fetch(`${API_BASE_URL}/api/data/${encodeURIComponent(currentUser)}`);
                 
                 if (response.ok) {
                     const cloudData = await response.json();
                     
                     if (cloudData && cloudData.config) {
-                        // 合并云端数据
+                        // 合并云端数据（取更新的数据）
                         Object.assign(config, cloudData.config);
                         dailyCheckins = { ...dailyCheckins, ...cloudData.dailyCheckins };
                         streakCount = Math.max(streakCount, cloudData.streakCount || 0);
                         totalStudyDays = Math.max(totalStudyDays, cloudData.totalStudyDays || 0);
                         
-                        // 保存到本地
-                        localStorage.setItem('frenchLearningData', JSON.stringify({
-                            config, dailyCheckins, streakCount, totalStudyDays, currentUser,
+                        // 保存合并后的数据到本地
+                        const userDataKey = `frenchLearningData_${currentUser}`;
+                        localStorage.setItem(userDataKey, JSON.stringify({
+                            config, dailyCheckins, streakCount, totalStudyDays,
                             lastSync: new Date().toISOString()
                         }));
                         
-                        updateAllProgress();
-                        showSyncStatus('✅ 数据同步成功', 'success');
+                        showSyncStatus('云端数据同步成功', 'success');
                     }
                 } else if (response.status === 404) {
                     // 云端没有数据，这是正常的（新用户）
-                    showSyncStatus('云端暂无数据，将使用本地数据', 'info');
+                    showSyncStatus('云端暂无数据，将同步本地数据到云端', 'info');
+                    await syncToCloud();
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
                 }
             } catch (error) {
                 console.error('Sync from cloud failed:', error);
-                showSyncStatus('❌ 同步失败，使用本地数据', 'error');
+                showSyncStatus('云端同步失败，使用本地数据', 'error');
             }
         }
 
@@ -707,7 +944,7 @@
                     lastUpdate: new Date().toISOString()
                 };
 
-                const response = await fetch(`${API_BASE_URL}/api/data/${currentUser}`, {
+                const response = await fetch(`${API_BASE_URL}/api/data/${encodeURIComponent(currentUser)}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -716,35 +953,19 @@
                 });
 
                 if (response.ok) {
-                    showSyncStatus('✅ 已同步到云端', 'success');
+                    showSyncStatus('已同步到云端', 'success');
                 } else {
                     throw new Error(`HTTP ${response.status}`);
                 }
             } catch (error) {
                 console.error('Sync to cloud failed:', error);
-                showSyncStatus('❌ 云端同步失败', 'error');
+                showSyncStatus('云端同步失败，数据已保存在本地', 'error');
             }
         }
 
         // 显示同步状态
         function showSyncStatus(message, type) {
-            let statusDiv = document.getElementById('syncStatus');
-            if (!statusDiv) {
-                statusDiv = document.createElement('div');
-                statusDiv.id = 'syncStatus';
-                statusDiv.style.cssText = `
-                    position: fixed;
-                    top: 80px;
-                    right: 20px;
-                    padding: 10px 15px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    z-index: 1001;
-                    transition: all 0.3s ease;
-                    max-width: 250px;
-                `;
-                document.body.appendChild(statusDiv);
-            }
+            const statusDiv = document.getElementById('syncStatus');
             
             const colors = {
                 loading: { bg: '#2196F3', text: 'white' },
@@ -766,59 +987,34 @@
             }
         }
 
-        // 显示用户ID设置提示
-        function showUserIdPrompt() {
-            const userIdModal = document.createElement('div');
-            userIdModal.innerHTML = `
-                <div class="modal" style="display: block;">
-                    <div class="modal-content">
-                        <h2>🆔 设置云端同步</h2>
-                        <p>为了在所有设备间同步学习进度，请设置一个唯一的用户ID：</p>
-                        <div class="form-group">
-                            <label for="userIdInput">用户ID（建议使用邮箱或昵称）：</label>
-                            <input type="text" id="userIdInput" placeholder="例如：zhang123 或 zhang@email.com">
-                        </div>
-                        <p style="color: #666; font-size: 0.9em;">⚠️ 请记住此ID，在其他设备登录时需要输入相同ID</p>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="save-btn" onclick="setUserId()" style="flex: 1;">保存并开启云端同步</button>
-                            <button onclick="skipCloudSync()" style="flex: 1; background: #ccc; color: #666;">暂时跳过</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(userIdModal);
-            
-            window.setUserId = async function() {
-                const userId = document.getElementById('userIdInput').value.trim();
-                if (!userId) {
-                    alert('请输入用户ID');
-                    return;
-                }
+        // 初始化主应用
+        async function initMainApp() {
+            try {
+                updateAllProgress();
                 
-                currentUser = userId;
-                await saveData();
-                await syncFromCloud(); // 尝试从云端加载数据
-                userIdModal.remove();
-                showSyncStatus('✅ 云端同步已开启', 'success');
-            };
-            
-            window.skipCloudSync = function() {
-                userIdModal.remove();
-            };
+                // 延迟初始化图表，确保DOM完全加载
+                setTimeout(() => {
+                    initCharts();
+                    setTimeout(updateCharts, 200);
+                }, 100);
+                
+                checkDailyReset();
+            } catch (error) {
+                console.error('Error during main app initialization:', error);
+            }
         }
 
-        // 检查日期重置
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            const lastCheckin = localStorage.getItem('lastCheckinDate');
+        // 检查应用初始化
+        async function initApp() {
+            // 检查是否有保存的用户
+            const savedUser = localStorage.getItem('currentUser');
             
-            if (lastCheckin !== today) {
-                // 重置今日打卡状态
-                const todayButtons = document.querySelectorAll('.checkin-btn');
-                todayButtons.forEach(btn => {
-                    btn.classList.remove('completed');
-                    btn.disabled = false;
-                });
+            if (savedUser) {
+                currentUser = savedUser;
+                await loadUserData();
+                showMainApp();
+            } else {
+                showLoginPage();
             }
         }
 
@@ -905,8 +1101,8 @@
             // 检查是否完成了今日所有任务
             checkDailyCompletion();
             
-            localStorage.setItem('lastCheckinDate', today);
-            await saveData(); // 改为异步保存
+            localStorage.setItem(`lastCheckinDate_${currentUser}`, today);
+            await saveUserData();
             updateAllProgress();
         }
 
@@ -926,7 +1122,7 @@
             } else if (type === 'duolingo') {
                 // 按顺序完成多邻国阶段
                 if (config.duolingo.a1.completed < config.duolingo.a1.total) {
-                    config.duolingo.a1.completed += Math.random() < 0.5 ? 1 : 2; // 1-2单元随机
+                    config.duolingo.a1.completed += Math.random() < 0.5 ? 1 : 2;
                     config.duolingo.a1.completed = Math.min(config.duolingo.a1.completed, config.duolingo.a1.total);
                 } else if (config.duolingo.a2.completed < config.duolingo.a2.total) {
                     config.duolingo.a2.completed += Math.random() < 0.5 ? 1 : 2;
@@ -935,7 +1131,7 @@
                     config.duolingo.b1.completed += Math.random() < 0.5 ? 1 : 2;
                     config.duolingo.b1.completed = Math.min(config.duolingo.b1.completed, config.duolingo.b1.total);
                 } else if (config.duolingo.b2.completed < config.duolingo.b2.total) {
-                    config.duolingo.b2.completed += 4; // B2阶段每天4单元
+                    config.duolingo.b2.completed += 4;
                     config.duolingo.b2.completed = Math.min(config.duolingo.b2.completed, config.duolingo.b2.total);
                 }
             }
@@ -952,7 +1148,7 @@
             if (allCompleted) {
                 streakCount++;
                 totalStudyDays++;
-                showAchievement('🎉 恭喜完成今日所有学习任务!');
+                showAchievement('恭喜完成今日所有学习任务!');
             }
         }
 
@@ -966,12 +1162,42 @@
             achievement.style.left = '50%';
             achievement.style.transform = 'translate(-50%, -50%)';
             achievement.style.zIndex = '9999';
+            achievement.style.padding = '20px';
+            achievement.style.borderRadius = '15px';
+            achievement.style.fontSize = '1.2em';
             
             document.body.appendChild(achievement);
             
             setTimeout(() => {
                 achievement.remove();
             }, 3000);
+        }
+
+        // 检查日期重置
+        function checkDailyReset() {
+            const today = new Date().toDateString();
+            const lastCheckin = localStorage.getItem(`lastCheckinDate_${currentUser}`);
+            
+            if (lastCheckin !== today) {
+                // 重置今日打卡状态
+                const todayButtons = document.querySelectorAll('.checkin-btn');
+                todayButtons.forEach(btn => {
+                    btn.classList.remove('completed');
+                    btn.disabled = false;
+                });
+            } else {
+                // 恢复今日打卡状态
+                const todayCheckins = dailyCheckins[today] || {};
+                Object.keys(todayCheckins).forEach(checkinType => {
+                    const [type, action] = checkinType.split('_');
+                    const buttonId = `${type}${action.charAt(0).toUpperCase() + action.slice(1)}Btn`;
+                    const button = document.getElementById(buttonId);
+                    if (button) {
+                        button.classList.add('completed');
+                        button.disabled = true;
+                    }
+                });
+            }
         }
 
         // 初始化图表
@@ -986,7 +1212,6 @@
                     return;
                 }
 
-                // 确保 Chart.js 已加载
                 if (typeof Chart === 'undefined') {
                     console.warn('Chart.js not loaded yet, retrying in 100ms');
                     setTimeout(initCharts, 100);
@@ -1050,7 +1275,6 @@
                 console.log('Charts initialized successfully');
             } catch (error) {
                 console.error('Error initializing charts:', error);
-                // 如果图表初始化失败，隐藏图表容器
                 const chartContainers = document.querySelectorAll('.chart-container');
                 chartContainers.forEach(container => {
                     container.style.display = 'none';
@@ -1077,7 +1301,7 @@
                         Math.round((classCompleted / classTotal) * 100),
                         Math.round((duolingoCompleted / duolingoTotal) * 100)
                     ];
-                    progressChart.update('none'); // 使用 'none' 模式避免动画延迟
+                    progressChart.update('none');
                 }
                 
                 // 更新每日打卡图表
@@ -1128,7 +1352,7 @@
             document.getElementById('settingsModal').style.display = 'none';
         }
 
-        function saveSettings() {
+        async function saveSettings() {
             // 保存上课进度
             config.class.phonics.completed = Math.min(parseInt(document.getElementById('classPhonics').value) || 0, 5);
             config.class.a1.completed = Math.min(parseInt(document.getElementById('classA1').value) || 0, 36);
@@ -1141,11 +1365,11 @@
             config.duolingo.b1.completed = Math.min(parseInt(document.getElementById('duolingoB1').value) || 0, 100);
             config.duolingo.b2.completed = Math.min(parseInt(document.getElementById('duolingoB2').value) || 0, 73);
             
-            saveData(); // 自动同步到云端
+            await saveUserData();
             updateAllProgress();
             closeSettings();
             
-            showAchievement('✅ 初始进度设置已保存!');
+            showAchievement('初始进度设置已保存!');
         }
 
         // 点击模态框外部关闭
@@ -1156,90 +1380,13 @@
             }
         }
 
-        // 数据导出功能
-        function exportData() {
-            const data = {
-                config,
-                dailyCheckins,
-                streakCount,
-                totalStudyDays,
-                exportDate: new Date().toISOString()
-            };
-            
-            const dataStr = JSON.stringify(data, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(dataBlob);
-            link.download = `french_learning_backup_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-        }
-
-        // 数据导入功能
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.config) {
-                        Object.assign(config, data.config);
-                        dailyCheckins = data.dailyCheckins || {};
-                        streakCount = data.streakCount || 0;
-                        totalStudyDays = data.totalStudyDays || 0;
-                        
-                        saveData();
-                        updateAllProgress();
-                        showAchievement('✅ 数据导入成功!');
-                    }
-                } catch (error) {
-                    alert('导入失败，请检查文件格式');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        // 重置所有数据
-        function resetAllData() {
-            if (confirm('确定要重置所有数据吗？此操作不可撤销！')) {
-                localStorage.removeItem('frenchLearningData');
-                localStorage.removeItem('lastCheckinDate');
-                location.reload();
-            }
-        }
-
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 确保页面完全加载后再初始化
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
-            
-            // 每小时检查一次是否需要重置日期
-            setInterval(checkDailyReset, 3600000);
-        });
-
-        // 如果页面已经加载完成，直接初始化
-        if (document.readyState !== 'loading') {
-            init();
-        }
-
         // 键盘快捷键
         document.addEventListener('keydown', function(event) {
             if (event.ctrlKey || event.metaKey) {
                 switch(event.key) {
                     case 's':
                         event.preventDefault();
-                        openSettings();
-                        break;
-                    case 'e':
-                        event.preventDefault();
-                        exportData();
+                        if (currentUser) openSettings();
                         break;
                 }
             }
@@ -1250,84 +1397,15 @@
             }
         });
 
-        // 添加一些额外的辅助功能
-        
-        // 获取当前学习阶段
-        function getCurrentStage() {
-            // 上课当前阶段
-            let classStage = '';
-            if (config.class.phonics.completed < config.class.phonics.total) {
-                classStage = '语音';
-            } else if (config.class.a1.completed < config.class.a1.total) {
-                classStage = 'A1';
-            } else if (config.class.a2.completed < config.class.a2.total) {
-                classStage = 'A2';
-            } else if (config.class.b1.completed < config.class.b1.total) {
-                classStage = 'B1';
-            } else {
-                classStage = '已完成';
-            }
-            
-            // 多邻国当前阶段
-            let duolingoStage = '';
-            if (config.duolingo.a1.completed < config.duolingo.a1.total) {
-                duolingoStage = 'A1';
-            } else if (config.duolingo.a2.completed < config.duolingo.a2.total) {
-                duolingoStage = 'A2';
-            } else if (config.duolingo.b1.completed < config.duolingo.b1.total) {
-                duolingoStage = 'B1';
-            } else if (config.duolingo.b2.completed < config.duolingo.b2.total) {
-                duolingoStage = 'B2';
-            } else {
-                duolingoStage = '已完成';
-            }
-            
-            return { class: classStage, duolingo: duolingoStage };
-        }
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
 
-        // 计算学习效率
-        function calculateEfficiency() {
-            const totalPossibleDays = Object.keys(dailyCheckins).length;
-            if (totalPossibleDays === 0) return 0;
-            
-            let totalCheckins = 0;
-            Object.values(dailyCheckins).forEach(day => {
-                totalCheckins += Object.keys(day).length;
-            });
-            
-            return Math.round((totalCheckins / (totalPossibleDays * 4)) * 100);
+        // 如果页面已经加载完成，直接初始化
+        if (document.readyState !== 'loading') {
+            initApp();
         }
-
-        // 预测完成时间
-        function predictCompletion() {
-            const efficiency = calculateEfficiency();
-            if (efficiency === 0) return '无法预测';
-            
-            const classRemaining = (config.class.phonics.total - config.class.phonics.completed) +
-                                 (config.class.a1.total - config.class.a1.completed) +
-                                 (config.class.a2.total - config.class.a2.completed) +
-                                 (config.class.b1.total - config.class.b1.completed);
-            
-            const duolingoRemaining = (config.duolingo.a1.total - config.duolingo.a1.completed) +
-                                    (config.duolingo.a2.total - config.duolingo.a2.completed) +
-                                    (config.duolingo.b1.total - config.duolingo.b1.completed) +
-                                    (config.duolingo.b2.total - config.duolingo.b2.completed);
-            
-            // 基于效率调整预测
-            const adjustedClassDays = Math.ceil(classRemaining / (efficiency / 100));
-            const adjustedDuolingoDays = Math.ceil(duolingoRemaining / (2 * efficiency / 100));
-            
-            return Math.max(adjustedClassDays, adjustedDuolingoDays);
-        }
-
-        // 定期更新预测
-        setInterval(() => {
-            const predicted = predictCompletion();
-            if (typeof predicted === 'number') {
-                document.getElementById('remainingDays').textContent = predicted;
-            }
-        }, 60000); // 每分钟更新一次
     </script>
 </body>
 </html>
-                
