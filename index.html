@@ -543,7 +543,7 @@
 
     <script>
         // 配置API基础URL - 请替换为您的Worker域名
-        const API_BASE = 'https://french-learning-api.teresascottr45677927.workers.dev';
+        const API_BASE = 'https://your-worker-domain.workers.dev';
         
         // 全局变量
         let authToken = null;
@@ -676,6 +676,9 @@
                 // 执行之前被阻止的操作
                 if (currentAction) {
                     await executeAction(currentAction, currentActionData);
+                } else {
+                    // 如果没有待执行的操作，直接加载数据
+                    await loadData();
                 }
             } catch (error) {
                 showModalError(errorDiv, '密码错误');
