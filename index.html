@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>法语学习进度追踪器</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <title>法语学习打卡</title>
     <style>
         * {
             margin: 0;
@@ -19,111 +18,6 @@
             padding: 20px;
         }
 
-        /* 登录页面样式 */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .login-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .login-card h1 {
-            color: #4a90e2;
-            margin-bottom: 10px;
-            font-size: 2.2em;
-        }
-
-        .login-card p {
-            color: #666;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .login-input {
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 1.1em;
-            transition: border-color 0.3s ease;
-        }
-
-        .login-input:focus {
-            outline: none;
-            border-color: #4a90e2;
-        }
-
-        .login-btn {
-            background: linear-gradient(135deg, #4a90e2, #357abd);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-
-        .login-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .login-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .user-info {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            color: #4a90e2;
-            z-index: 1000;
-        }
-
-        .logout-btn {
-            position: fixed;
-            top: 20px;
-            right: 80px;
-            background: #ff6b6b;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 0.9em;
-            z-index: 1000;
-        }
-
-        .logout-btn:hover {
-            background: #ff5252;
-        }
-
-        .main-app {
-            display: none;
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -134,247 +28,296 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
-            color: white;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
             padding: 30px;
             text-align: center;
+            color: white;
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.5rem;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: 1.1rem;
             opacity: 0.9;
         }
 
-        .overview {
-            padding: 30px;
-            background: #f8f9ff;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+        .stats {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .overview-card {
+        .stat-item {
+            text-align: center;
+            padding: 15px;
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .goal-section {
+            padding: 20px 30px;
+            background: #e3f2fd;
+            border-bottom: 1px solid #bbdefb;
+        }
+
+        .goal-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #1565c0;
+            font-weight: 600;
+        }
+
+        .goal-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .goal-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .goal-input label {
+            font-weight: 500;
+            color: #1565c0;
+        }
+
+        .goal-input input[type="date"], .goal-input input[type="password"] {
+            padding: 8px 12px;
+            border: 2px solid #bbdefb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .goal-input input:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .daily-target {
+            background: #fff3e0;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .daily-target-title {
+            color: #ef6c00;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .daily-target-text {
+            color: #f57c00;
+            font-size: 1.1rem;
+        }
+
+        .config-section {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .config-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .config-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .config-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-input label {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .config-input input[type="number"] {
+            width: 60px;
+            padding: 6px 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
             text-align: center;
         }
 
-        .overview-card h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.2em;
+        .config-input input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
-        .overview-card .number {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #4a90e2;
-            margin-bottom: 10px;
+        .update-btn, .reset-btn, .save-goal-btn {
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
         }
 
-        .progress-section {
+        .update-btn, .save-goal-btn {
+            background: #667eea;
+        }
+
+        .update-btn:hover, .save-goal-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .reset-btn {
+            background: #dc3545;
+            margin-left: 10px;
+        }
+
+        .reset-btn:hover {
+            background: #c82333;
+        }
+
+        .content {
             padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
         }
 
-        .progress-card {
-            background: white;
+        .level {
+            margin-bottom: 40px;
+            background: #f8f9fa;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
         }
 
-        .progress-card h2 {
-            color: #333;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .stage {
-            margin-bottom: 20px;
-        }
-
-        .stage-header {
+        .level-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
         }
 
-        .stage-name {
-            font-weight: bold;
-            color: #555;
+        .level-title {
+            font-size: 1.5rem;
+            color: #495057;
+            font-weight: 600;
         }
 
-        .stage-progress {
-            color: #4a90e2;
-            font-weight: bold;
+        .level-progress {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .progress-bar {
-            background: #e0e0e0;
-            border-radius: 10px;
-            height: 20px;
+            width: 200px;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
             overflow: hidden;
-            margin-bottom: 5px;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4a90e2, #357abd);
-            border-radius: 10px;
+            background: linear-gradient(90deg, #28a745, #20c997);
             transition: width 0.3s ease;
-            position: relative;
         }
 
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            animation: shimmer 2s infinite;
+        .progress-text {
+            font-weight: 600;
+            color: #495057;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .checkin-section {
-            padding: 30px;
-            background: #f8f9ff;
-        }
-
-        .checkin-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-        }
-
-        .checkin-buttons {
+        .units-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
         }
 
-        .checkin-btn {
-            padding: 15px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            font-weight: bold;
+        .unit {
+            aspect-ratio: 1;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            background: white;
             position: relative;
             overflow: hidden;
         }
 
-        .checkin-btn.study {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-        }
-
-        .checkin-btn.review {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-            color: white;
-        }
-
-        .checkin-btn:hover {
+        .unit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
-        .checkin-btn:active {
-            transform: translateY(0);
-        }
-
-        .checkin-btn.completed {
-            background: #e0e0e0;
-            color: #999;
-            cursor: not-allowed;
-        }
-
-        .checkin-btn.completed::before {
-            content: '✓ ';
-        }
-
-        .stats-section {
-            padding: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .chart-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        .achievement {
-            background: linear-gradient(135deg, #ffd700, #ffb300);
+        .unit.completed {
+            background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
+            border-color: #28a745;
         }
 
-        .streak-counter {
-            background: linear-gradient(135deg, #e91e63, #c2185b);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 20px;
+        .unit.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.7rem;
+            opacity: 0.8;
         }
 
-        .streak-number {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+        .level-1 .unit { border-color: #ff6b6b; }
+        .level-1 .unit.completed { background: linear-gradient(135deg, #ff6b6b, #ff8e8e); border-color: #ff6b6b; }
 
-        .settings-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4a90e2;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 1.5em;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
+        .level-2 .unit { border-color: #4ecdc4; }
+        .level-2 .unit.completed { background: linear-gradient(135deg, #4ecdc4, #6bccc4); border-color: #4ecdc4; }
 
-        .settings-btn:hover {
-            transform: scale(1.1);
-        }
+        .level-3 .unit { border-color: #45b7d1; }
+        .level-3 .unit.completed { background: linear-gradient(135deg, #45b7d1, #67c5d4); border-color: #45b7d1; }
 
+        .level-4 .unit { border-color: #f39c12; }
+        .level-4 .unit.completed { background: linear-gradient(135deg, #f39c12, #f5b342); border-color: #f39c12; }
+
+        .level-5 .unit { border-color: #9b59b6; }
+        .level-5 .unit.completed { background: linear-gradient(135deg, #9b59b6, #a569bd); border-color: #9b59b6; }
+
+        /* 模态框样式 */
         .modal {
             display: none;
             position: fixed;
@@ -388,1024 +331,771 @@
 
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: 15% auto;
             padding: 30px;
             border-radius: 15px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .form-group {
+        .modal h2 {
             margin-bottom: 20px;
+            color: #495057;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input {
+        .modal input {
             width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #dee2e6;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 16px;
         }
 
-        .form-group input:focus {
+        .modal input:focus {
             outline: none;
-            border-color: #4a90e2;
+            border-color: #667eea;
         }
 
-        .save-btn {
-            background: #4a90e2;
+        .modal button {
+            background: #667eea;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px 24px;
+            margin: 10px;
             border-radius: 8px;
-            font-size: 1.1em;
             cursor: pointer;
-            width: 100%;
+            font-size: 16px;
+            font-weight: 500;
         }
 
-        .save-btn:hover {
-            background: #357abd;
+        .modal button:hover {
+            background: #5a6fd8;
         }
 
-        .sync-status {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 1001;
-            transition: all 0.3s ease;
-            max-width: 250px;
+        .modal button.cancel {
+            background: #6c757d;
+        }
+
+        .modal button.cancel:hover {
+            background: #5a6268;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
             display: none;
         }
 
         @media (max-width: 768px) {
-            .progress-section {
-                grid-template-columns: 1fr;
+            .header h1 {
+                font-size: 2rem;
             }
             
-            .checkin-buttons {
-                grid-template-columns: 1fr;
+            .stats {
+                padding: 15px 20px;
             }
             
-            .overview {
-                grid-template-columns: 1fr;
+            .content {
+                padding: 20px;
+            }
+            
+            .level {
+                padding: 20px;
+            }
+            
+            .level-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .level-progress {
+                justify-content: space-between;
+            }
+            
+            .progress-bar {
+                width: 150px;
+            }
+            
+            .units-grid {
+                grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+                gap: 6px;
             }
 
-            .user-info, .logout-btn, .settings-btn {
-                position: relative;
-                margin-bottom: 10px;
+            .modal-content {
+                width: 350px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 登录页面 -->
-    <div id="loginPage" class="login-container">
-        <div class="login-card">
-            <h1>🇫🇷 法语学习追踪</h1>
-            <p>请输入您的用户名登录<br>首次使用将自动创建账户</p>
-            <form class="login-form" onsubmit="handleLogin(event)">
-                <input 
-                    type="text" 
-                    id="usernameInput" 
-                    class="login-input" 
-                    placeholder="输入用户名（如：zhang123）"
-                    required
-                    minlength="3"
-                    maxlength="20"
-                    pattern="[a-zA-Z0-9@._-]+"
-                    title="用户名只能包含字母、数字、@、.、_、-"
-                >
-                <button type="submit" class="login-btn" id="loginBtn">
-                    登录 / 注册
-                </button>
-            </form>
-            <p style="font-size: 0.8em; color: #999; margin-top: 20px;">
-                💡 提示：用户名将作为您的唯一标识，请记住以便在其他设备登录
-            </p>
+    <div class="container">
+        <div class="header">
+            <h1>🇫🇷 法语学习打卡</h1>
+            <p>坚持每天学习，成就更好的自己</p>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="loading">正在加载数据...</div>
+        </div>
+
+        <div class="goal-section">
+            <div class="goal-title">🎯 学习目标设置</div>
+            <div class="goal-form">
+                <div class="goal-input">
+                    <label>目标完成日期:</label>
+                    <input type="date" id="targetDate">
+                </div>
+                <button class="save-goal-btn" onclick="saveGoal()">保存目标</button>
+            </div>
+            <div class="daily-target" id="dailyTarget" style="display: none;">
+                <div class="daily-target-title">📅 每日学习建议</div>
+                <div class="daily-target-text" id="dailyTargetText"></div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <div class="config-title">📝 配置学习内容</div>
+            <div class="config-form">
+                <div class="config-input">
+                    <label>等级1:</label>
+                    <input type="number" id="level1" min="1" max="999" value="53">
+                    <span>单元</span>
+                </div>
+                <div class="config-input">
+                    <label>等级2:</label>
+                    <input type="number" id="level2" min="1" max="999" value="80">
+                    <span>单元</span>
+                </div>
+                <div class="config-input">
+                    <label>等级3:</label>
+                    <input type="number" id="level3" min="1" max="999" value="50">
+                    <span>单元</span>
+                </div>
+                <div class="config-input">
+                    <label>等级4:</label>
+                    <input type="number" id="level4" min="1" max="999" value="25">
+                    <span>单元</span>
+                </div>
+                <div class="config-input">
+                    <label>等级5:</label>
+                    <input type="number" id="level5" min="1" max="999" value="50">
+                    <span>单元</span>
+                </div>
+                <button class="update-btn" onclick="updateLevels()">更新配置</button>
+                <button class="reset-btn" onclick="resetProgress()">重置进度</button>
+            </div>
+        </div>
+
+        <div class="content" id="content">
+            <div class="loading">正在加载学习内容...</div>
         </div>
     </div>
 
-    <!-- 用户信息和登出按钮 -->
-    <div id="userInfo" class="user-info" style="display: none;">
-        👤 <span id="currentUsername"></span>
-    </div>
-    <button id="logoutBtn" class="logout-btn" style="display: none;" onclick="logout()">
-        登出
-    </button>
-
-    <!-- 主应用页面 -->
-    <div id="mainApp" class="main-app">
-        <button class="settings-btn" onclick="openSettings()">⚙️</button>
-        
-        <div class="container">
-            <div class="header">
-                <h1>🇫🇷 法语学习进度追踪</h1>
-                <p>坚持每一天，成就更好的自己</p>
-            </div>
-
-            <div class="overview">
-                <div class="overview-card">
-                    <h3>总体进度</h3>
-                    <div class="number" id="totalProgress">0%</div>
-                    <p>整体完成度</p>
-                </div>
-                <div class="overview-card">
-                    <h3>预计剩余天数</h3>
-                    <div class="number" id="remainingDays">--</div>
-                    <p>按当前进度</p>
-                </div>
-                <div class="overview-card">
-                    <h3>连续打卡</h3>
-                    <div class="number" id="streakDays">0</div>
-                    <p>天</p>
-                </div>
-                <div class="overview-card">
-                    <h3>学习总天数</h3>
-                    <div class="number" id="totalDays">0</div>
-                    <p>天</p>
-                </div>
-            </div>
-
-            <div class="progress-section">
-                <div class="progress-card">
-                    <h2>📚 上课进度</h2>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">语音</span>
-                            <span class="stage-progress" id="classPhonicsProgress">0/5</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="classPhonicsBar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">A1 阶段</span>
-                            <span class="stage-progress" id="classA1Progress">0/36</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="classA1Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">A2 阶段</span>
-                            <span class="stage-progress" id="classA2Progress">0/35</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="classA2Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">B1 阶段</span>
-                            <span class="stage-progress" id="classB1Progress">0/48</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="classB1Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="progress-card">
-                    <h2>🦉 多邻国进度</h2>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">A1 阶段</span>
-                            <span class="stage-progress" id="duolingoA1Progress">0/53</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="duolingoA1Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">A2 阶段</span>
-                            <span class="stage-progress" id="duolingoA2Progress">0/46</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="duolingoA2Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">B1 阶段</span>
-                            <span class="stage-progress" id="duolingoB1Progress">0/100</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="duolingoB1Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="stage">
-                        <div class="stage-header">
-                            <span class="stage-name">B2 阶段</span>
-                            <span class="stage-progress" id="duolingoB2Progress">0/73</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="duolingoB2Bar" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="checkin-section">
-                <div class="checkin-card">
-                    <h2>📅 今日打卡</h2>
-                    <div class="checkin-buttons">
-                        <button class="checkin-btn study" id="classStudyBtn" onclick="checkin('class', 'study')">
-                            上课学习
-                        </button>
-                        <button class="checkin-btn review" id="classReviewBtn" onclick="checkin('class', 'review')">
-                            上课复习
-                        </button>
-                        <button class="checkin-btn study" id="duolingoStudyBtn" onclick="checkin('duolingo', 'study')">
-                            多邻国学习
-                        </button>
-                        <button class="checkin-btn review" id="duolingoReviewBtn" onclick="checkin('duolingo', 'review')">
-                            多邻国复习
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stats-section">
-                <div class="chart-container">
-                    <h3>学习进度对比</h3>
-                    <canvas id="progressChart" width="400" height="200"></canvas>
-                </div>
-                <div class="chart-container">
-                    <h3>每日打卡统计</h3>
-                    <canvas id="dailyChart" width="400" height="200"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 同步状态提示 -->
-    <div id="syncStatus" class="sync-status"></div>
-
-    <!-- 设置模态框 -->
-    <div id="settingsModal" class="modal">
+    <!-- 密码验证模态框 -->
+    <div id="passwordModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeSettings()">&times;</span>
-            <h2>⚙️ 设置初始进度</h2>
-            
-            <h3>📚 上课进度设置</h3>
-            <div class="form-group">
-                <label for="classPhonics">语音 (已完成单元数/5):</label>
-                <input type="number" id="classPhonics" min="0" max="5" value="0">
+            <h2>🔐 密码验证</h2>
+            <div class="error" id="passwordError"></div>
+            <input type="password" id="passwordInput" placeholder="请输入密码">
+            <div>
+                <button onclick="verifyPassword()">确认</button>
+                <button class="cancel" onclick="closePasswordModal()">取消</button>
             </div>
-            <div class="form-group">
-                <label for="classA1">A1 阶段 (已完成单元数/36):</label>
-                <input type="number" id="classA1" min="0" max="36" value="0">
-            </div>
-            <div class="form-group">
-                <label for="classA2">A2 阶段 (已完成单元数/35):</label>
-                <input type="number" id="classA2" min="0" max="35" value="0">
-            </div>
-            <div class="form-group">
-                <label for="classB1">B1 阶段 (已完成单元数/48):</label>
-                <input type="number" id="classB1" min="0" max="48" value="0">
-            </div>
+        </div>
+    </div>
 
-            <h3>🦉 多邻国进度设置</h3>
-            <div class="form-group">
-                <label for="duolingoA1">A1 阶段 (已完成单元数/53):</label>
-                <input type="number" id="duolingoA1" min="0" max="53" value="0">
+    <!-- 设置密码模态框 -->
+    <div id="setupPasswordModal" class="modal">
+        <div class="modal-content">
+            <h2>🔧 首次设置</h2>
+            <p style="margin-bottom: 20px; color: #666;">请设置一个密码来保护您的学习数据</p>
+            <div class="error" id="setupError"></div>
+            <input type="password" id="setupPasswordInput" placeholder="设置密码（至少6位）">
+            <input type="password" id="confirmPasswordInput" placeholder="确认密码">
+            <div>
+                <button onclick="setupPassword()">设置密码</button>
             </div>
-            <div class="form-group">
-                <label for="duolingoA2">A2 阶段 (已完成单元数/46):</label>
-                <input type="number" id="duolingoA2" min="0" max="46" value="0">
-            </div>
-            <div class="form-group">
-                <label for="duolingoB1">B1 阶段 (已完成单元数/100):</label>
-                <input type="number" id="duolingoB1" min="0" max="100" value="0">
-            </div>
-            <div class="form-group">
-                <label for="duolingoB2">B2 阶段 (已完成单元数/73):</label>
-                <input type="number" id="duolingoB2" min="0" max="73" value="0">
-            </div>
-
-            <button class="save-btn" onclick="saveSettings()">保存设置</button>
         </div>
     </div>
 
     <script>
-        // 数据结构
-        const config = {
-            class: {
-                phonics: { total: 5, completed: 0 },
-                a1: { total: 36, completed: 0 },
-                a2: { total: 35, completed: 0 },
-                b1: { total: 48, completed: 0 }
-            },
-            duolingo: {
-                a1: { total: 53, completed: 0 },
-                a2: { total: 46, completed: 0 },
-                b1: { total: 100, completed: 0 },
-                b2: { total: 73, completed: 0 }
-            }
+        // 配置API基础URL - 请替换为您的Worker域名
+        const API_BASE = 'https://french-learning-api.teresascottr45677927.workers.dev';
+        
+        // 全局变量
+        let authToken = null;
+        let currentAction = null;
+        let currentActionData = null;
+        let levelConfig = {
+            1: 53, 2: 80, 3: 50, 4: 25, 5: 50
         };
+        let progressData = {};
 
-        let dailyCheckins = {};
-        let streakCount = 0;
-        let totalStudyDays = 0;
-        let progressChart, dailyChart;
-        let currentUser = null;
-        let isOnline = navigator.onLine;
-
-        // 云端同步配置 - 在这里替换你的Worker URL
-        const API_BASE_URL = 'https://ftracker.teresascottr45677927.workers.dev';
-        
-        // 检查网络状态
-        window.addEventListener('online', () => {
-            isOnline = true;
-            showSyncStatus('网络已连接', 'success');
-            if (currentUser) {
-                syncToCloud();
-            }
-        });
-        
-        window.addEventListener('offline', () => {
-            isOnline = false;
-            showSyncStatus('网络已断开，数据将保存在本地', 'info');
-        });
-
-        // 登录处理
-        async function handleLogin(event) {
-            event.preventDefault();
-            const username = document.getElementById('usernameInput').value.trim();
-            const loginBtn = document.getElementById('loginBtn');
-            
-            if (!username) {
-                alert('请输入用户名');
-                return;
-            }
-
-            // 验证用户名格式
-            const validPattern = /^[a-zA-Z0-9@._-]+$/;
-            if (!validPattern.test(username)) {
-                alert('用户名只能包含字母、数字、@、.、_、-');
-                return;
-            }
-
-            loginBtn.disabled = true;
-            loginBtn.textContent = '登录中...';
-
-            try {
-                // 保存用户名到本地
-                currentUser = username;
-                localStorage.setItem('currentUser', username);
-                
-                // 尝试从云端加载数据
-                await loadUserData();
-                
-                // 切换到主应用
-                showMainApp();
-                
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('登录失败，请重试');
-                loginBtn.disabled = false;
-                loginBtn.textContent = '登录 / 注册';
-            }
-        }
-
-        // 显示主应用
-        function showMainApp() {
-            document.getElementById('loginPage').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            document.getElementById('userInfo').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'block';
-            document.getElementById('currentUsername').textContent = currentUser;
-            
-            // 初始化主应用
-            initMainApp();
-        }
-
-        // 显示登录页
-        function showLoginPage() {
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('userInfo').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
-        }
-
-        // 登出
-        function logout() {
-            if (confirm('确定要登出吗？本地数据将保留。')) {
-                currentUser = null;
-                localStorage.removeItem('currentUser');
-                showLoginPage();
-                document.getElementById('usernameInput').value = '';
-            }
-        }
-
-        // 加载用户数据
-        async function loadUserData() {
-            try {
-                // 先加载本地数据
-                await loadLocalData();
-                
-                // 然后尝试从云端同步
-                if (isOnline && API_BASE_URL !== 'https://your-worker-name.your-subdomain.workers.dev') {
-                    await syncFromCloud();
-                } else {
-                    showSyncStatus('使用本地数据（云端同步未配置）', 'info');
+        // API调用函数
+        async function apiCall(endpoint, method = 'GET', data = null, requireAuth = true) {
+            const options = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
                 }
-            } catch (error) {
-                console.error('Error loading user data:', error);
-                showSyncStatus('数据加载失败，使用默认数据', 'error');
-            }
-        }
-
-        // 加载本地数据
-        async function loadLocalData() {
-            const userDataKey = `frenchLearningData_${currentUser}`;
-            const savedData = localStorage.getItem(userDataKey);
-            
-            if (savedData) {
-                try {
-                    const data = JSON.parse(savedData);
-                    Object.assign(config, data.config || {});
-                    dailyCheckins = data.dailyCheckins || {};
-                    streakCount = data.streakCount || 0;
-                    totalStudyDays = data.totalStudyDays || 0;
-                    showSyncStatus('本地数据加载成功', 'success');
-                } catch (error) {
-                    console.error('Error parsing local data:', error);
-                    showSyncStatus('本地数据损坏，使用默认设置', 'error');
-                }
-            } else {
-                showSyncStatus('新用户，使用默认设置', 'info');
-            }
-        }
-
-        // 保存数据（本地 + 云端）
-        async function saveUserData() {
-            if (!currentUser) return;
-            
-            const data = {
-                config,
-                dailyCheckins,
-                streakCount,
-                totalStudyDays,
-                lastSave: new Date().toISOString()
             };
-            
-            // 保存到本地（按用户名分别保存）
-            const userDataKey = `frenchLearningData_${currentUser}`;
-            localStorage.setItem(userDataKey, JSON.stringify(data));
-            
-            // 同步到云端
-            if (isOnline && API_BASE_URL !== 'https://your-worker-name.your-subdomain.workers.dev') {
-                await syncToCloud();
+
+            if (requireAuth && authToken) {
+                options.headers.Authorization = `Bearer ${authToken}`;
+            }
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, options);
+                const result = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(result.error || 'API调用失败');
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('API调用错误:', error);
+                throw error;
             }
         }
 
-        // 从云端同步数据
-        async function syncFromCloud() {
-            if (!currentUser || !isOnline) return;
-            
+        // 初始化页面
+        async function init() {
             try {
-                showSyncStatus('正在从云端同步数据...', 'loading');
+                // 检查是否已设置密码
+                const settings = await apiCall('/api/settings', 'GET', null, false);
+                if (!settings.passwordSet) {
+                    document.getElementById('setupPasswordModal').style.display = 'block';
+                    return;
+                }
                 
-                const response = await fetch(`${API_BASE_URL}/api/data/${encodeURIComponent(currentUser)}`);
-                
-                if (response.ok) {
-                    const cloudData = await response.json();
-                    
-                    if (cloudData && cloudData.config) {
-                        // 合并云端数据（取更新的数据）
-                        Object.assign(config, cloudData.config);
-                        dailyCheckins = { ...dailyCheckins, ...cloudData.dailyCheckins };
-                        streakCount = Math.max(streakCount, cloudData.streakCount || 0);
-                        totalStudyDays = Math.max(totalStudyDays, cloudData.totalStudyDays || 0);
-                        
-                        // 保存合并后的数据到本地
-                        const userDataKey = `frenchLearningData_${currentUser}`;
-                        localStorage.setItem(userDataKey, JSON.stringify({
-                            config, dailyCheckins, streakCount, totalStudyDays,
-                            lastSync: new Date().toISOString()
-                        }));
-                        
-                        showSyncStatus('云端数据同步成功', 'success');
-                    }
-                } else if (response.status === 404) {
-                    // 云端没有数据，这是正常的（新用户）
-                    showSyncStatus('云端暂无数据，将同步本地数据到云端', 'info');
-                    await syncToCloud();
+                // 尝试从sessionStorage获取token
+                const savedToken = sessionStorage.getItem('authToken');
+                if (savedToken) {
+                    authToken = savedToken;
+                    await loadData();
                 } else {
-                    throw new Error(`HTTP ${response.status}`);
+                    showPasswordModal('init');
                 }
             } catch (error) {
-                console.error('Sync from cloud failed:', error);
-                showSyncStatus('云端同步失败，使用本地数据', 'error');
+                console.error('初始化失败:', error);
+                showError('初始化失败，请刷新页面重试');
             }
         }
 
-        // 同步数据到云端
-        async function syncToCloud() {
-            if (!currentUser || !isOnline) return;
-            
-            try {
-                showSyncStatus('正在同步到云端...', 'loading');
-                
-                const data = {
-                    config,
-                    dailyCheckins,
-                    streakCount,
-                    totalStudyDays,
-                    lastUpdate: new Date().toISOString()
-                };
+        // 设置密码
+        async function setupPassword() {
+            const password = document.getElementById('setupPasswordInput').value;
+            const confirmPassword = document.getElementById('confirmPasswordInput').value;
+            const errorDiv = document.getElementById('setupError');
 
-                const response = await fetch(`${API_BASE_URL}/api/data/${encodeURIComponent(currentUser)}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
+            if (password.length < 6) {
+                showModalError(errorDiv, '密码至少需要6位字符');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showModalError(errorDiv, '两次输入的密码不一致');
+                return;
+            }
+
+            try {
+                await apiCall('/api/setup', 'POST', { password }, false);
+                document.getElementById('setupPasswordModal').style.display = 'none';
+                showSuccess('密码设置成功！');
+                // 设置完密码后自动登录
+                const authResult = await apiCall('/api/auth', 'POST', { password }, false);
+                authToken = authResult.token;
+                sessionStorage.setItem('authToken', authToken);
+                await loadData();
+            } catch (error) {
+                showModalError(errorDiv, error.message);
+            }
+        }
+
+        // 显示密码验证模态框
+        function showPasswordModal(action, data = null) {
+            currentAction = action;
+            currentActionData = data;
+            document.getElementById('passwordModal').style.display = 'block';
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('passwordError').style.display = 'none';
+        }
+
+        // 关闭密码模态框
+        function closePasswordModal() {
+            document.getElementById('passwordModal').style.display = 'none';
+            currentAction = null;
+            currentActionData = null;
+        }
+
+        // 验证密码
+        async function verifyPassword() {
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('passwordError');
+
+            if (!password) {
+                showModalError(errorDiv, '请输入密码');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/api/auth', 'POST', { password }, false);
+                authToken = result.token;
+                sessionStorage.setItem('authToken', authToken);
+                
+                closePasswordModal();
+                
+                // 执行之前被阻止的操作
+                if (currentAction) {
+                    await executeAction(currentAction, currentActionData);
+                }
+            } catch (error) {
+                showModalError(errorDiv, '密码错误');
+            }
+        }
+
+        // 执行需要验证的操作
+        async function executeAction(action, data) {
+            switch (action) {
+                case 'init':
+                    await loadData();
+                    break;
+                case 'toggleUnit':
+                    await toggleUnitAPI(data.level, data.unit);
+                    break;
+                case 'updateLevels':
+                    await updateLevelsAPI();
+                    break;
+                case 'resetProgress':
+                    await resetProgressAPI();
+                    break;
+                case 'saveGoal':
+                    await saveGoalAPI();
+                    break;
+            }
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                const [settings, progress] = await Promise.all([
+                    apiCall('/api/settings'),
+                    apiCall('/api/progress')
+                ]);
+
+                levelConfig = settings.levelConfig || levelConfig;
+                progressData = progress.reduce((acc, item) => {
+                    const key = `${item.level}_${item.unit}`;
+                    acc[key] = true;
+                    return acc;
+                }, {});
+
+                // 更新UI
+                updateConfigInputs();
+                if (settings.targetDate) {
+                    document.getElementById('targetDate').value = settings.targetDate;
+                    updateDailyTarget();
+                }
+                renderContent();
+            } catch (error) {
+                if (error.message.includes('Unauthorized')) {
+                    authToken = null;
+                    sessionStorage.removeItem('authToken');
+                    showPasswordModal('init');
+                } else {
+                    showError('数据加载失败: ' + error.message);
+                }
+            }
+        }
+
+        // 更新配置输入框
+        function updateConfigInputs() {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`level${i}`).value = levelConfig[i];
+            }
+        }
+
+        // 获取单元状态
+        function getUnitStatus(level, unit) {
+            const key = `${level}_${unit}`;
+            return progressData[key] || false;
+        }
+
+        // 切换单元状态
+        function toggleUnit(level, unit) {
+            if (!authToken) {
+                showPasswordModal('toggleUnit', { level, unit });
+                return;
+            }
+            toggleUnitAPI(level, unit);
+        }
+
+        // 切换单元状态API调用
+        async function toggleUnitAPI(level, unit) {
+            try {
+                const currentStatus = getUnitStatus(level, unit);
+                await apiCall('/api/progress', 'POST', {
+                    level,
+                    unit,
+                    completed: !currentStatus
                 });
 
-                if (response.ok) {
-                    showSyncStatus('已同步到云端', 'success');
+                // 更新本地数据
+                const key = `${level}_${unit}`;
+                if (!currentStatus) {
+                    progressData[key] = true;
                 } else {
-                    throw new Error(`HTTP ${response.status}`);
+                    delete progressData[key];
                 }
+                
+                renderContent();
             } catch (error) {
-                console.error('Sync to cloud failed:', error);
-                showSyncStatus('云端同步失败，数据已保存在本地', 'error');
+                showError('更新进度失败: ' + error.message);
             }
         }
 
-        // 显示同步状态
-        function showSyncStatus(message, type) {
-            const statusDiv = document.getElementById('syncStatus');
+        // 计算统计数据
+        function calculateStats() {
+            let totalUnits = 0;
+            let completedUnits = 0;
             
-            const colors = {
-                loading: { bg: '#2196F3', text: 'white' },
-                success: { bg: '#4CAF50', text: 'white' },
-                error: { bg: '#f44336', text: 'white' },
-                info: { bg: '#ff9800', text: 'white' }
+            for (let level = 1; level <= 5; level++) {
+                const unitCount = levelConfig[level];
+                totalUnits += unitCount;
+                
+                for (let unit = 1; unit <= unitCount; unit++) {
+                    if (getUnitStatus(level, unit)) {
+                        completedUnits++;
+                    }
+                }
+            }
+            
+            const completionRate = totalUnits > 0 ? Math.round((completedUnits / totalUnits) * 100) : 0;
+            const remainingUnits = totalUnits - completedUnits;
+            
+            return {
+                totalUnits,
+                completedUnits,
+                remainingUnits,
+                completionRate
             };
+        }
+
+        // 渲染统计信息
+        function renderStats() {
+            const stats = calculateStats();
+            const statsContainer = document.getElementById('stats');
             
-            const color = colors[type] || colors.info;
-            statusDiv.style.backgroundColor = color.bg;
-            statusDiv.style.color = color.text;
-            statusDiv.textContent = message;
-            statusDiv.style.display = 'block';
+            statsContainer.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-number">${stats.totalUnits}</div>
+                    <div class="stat-label">总单元数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${stats.completedUnits}</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${stats.remainingUnits}</div>
+                    <div class="stat-label">待完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${stats.completionRate}%</div>
+                    <div class="stat-label">完成率</div>
+                </div>
+            `;
+        }
+
+        // 渲染学习内容
+        function renderContent() {
+            const contentContainer = document.getElementById('content');
+            let html = '';
             
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    statusDiv.style.display = 'none';
-                }, 3000);
+            for (let level = 1; level <= 5; level++) {
+                const unitCount = levelConfig[level];
+                let completedCount = 0;
+                
+                // 计算该等级的完成数量
+                for (let unit = 1; unit <= unitCount; unit++) {
+                    if (getUnitStatus(level, unit)) {
+                        completedCount++;
+                    }
+                }
+                
+                const progressPercentage = unitCount > 0 ? Math.round((completedCount / unitCount) * 100) : 0;
+                
+                html += `
+                    <div class="level level-${level}">
+                        <div class="level-header">
+                            <div class="level-title">等级 ${level}</div>
+                            <div class="level-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progressPercentage}%"></div>
+                                </div>
+                                <div class="progress-text">${completedCount}/${unitCount} (${progressPercentage}%)</div>
+                            </div>
+                        </div>
+                        <div class="units-grid">
+                `;
+                
+                // 生成单元格
+                for (let unit = 1; unit <= unitCount; unit++) {
+                    const isCompleted = getUnitStatus(level, unit);
+                    const completedClass = isCompleted ? 'completed' : '';
+                    
+                    html += `
+                        <div class="unit ${completedClass}" 
+                             onclick="toggleUnit(${level}, ${unit})"
+                             title="等级 ${level} - 单元 ${unit}">
+                            ${unit}
+                        </div>
+                    `;
+                }
+                
+                html += `
+                        </div>
+                    </div>
+                `;
             }
+            
+            contentContainer.innerHTML = html;
+            renderStats();
         }
 
-        // 初始化主应用
-        async function initMainApp() {
-            try {
-                updateAllProgress();
-                
-                // 延迟初始化图表，确保DOM完全加载
-                setTimeout(() => {
-                    initCharts();
-                    setTimeout(updateCharts, 200);
-                }, 100);
-                
-                checkDailyReset();
-            } catch (error) {
-                console.error('Error during main app initialization:', error);
-            }
-        }
-
-        // 检查应用初始化
-        async function initApp() {
-            // 检查是否有保存的用户
-            const savedUser = localStorage.getItem('currentUser');
+        // 更新每日目标显示
+        function updateDailyTarget() {
+            const targetDate = document.getElementById('targetDate').value;
+            const dailyTargetDiv = document.getElementById('dailyTarget');
+            const dailyTargetText = document.getElementById('dailyTargetText');
             
-            if (savedUser) {
-                currentUser = savedUser;
-                await loadUserData();
-                showMainApp();
-            } else {
-                showLoginPage();
-            }
-        }
-
-        // 更新所有进度
-        function updateAllProgress() {
-            updateClassProgress();
-            updateDuolingoProgress();
-            updateOverview();
-            updateCharts();
-        }
-
-        // 更新上课进度
-        function updateClassProgress() {
-            const stages = ['phonics', 'a1', 'a2', 'b1'];
-            stages.forEach(stage => {
-                const { total, completed } = config.class[stage];
-                const percentage = (completed / total) * 100;
-                
-                document.getElementById(`class${stage.charAt(0).toUpperCase() + stage.slice(1)}Progress`).textContent = `${completed}/${total}`;
-                document.getElementById(`class${stage.charAt(0).toUpperCase() + stage.slice(1)}Bar`).style.width = `${percentage}%`;
-            });
-        }
-
-        // 更新多邻国进度
-        function updateDuolingoProgress() {
-            const stages = ['a1', 'a2', 'b1', 'b2'];
-            stages.forEach(stage => {
-                const { total, completed } = config.duolingo[stage];
-                const percentage = (completed / total) * 100;
-                
-                document.getElementById(`duolingo${stage.toUpperCase()}Progress`).textContent = `${completed}/${total}`;
-                document.getElementById(`duolingo${stage.toUpperCase()}Bar`).style.width = `${percentage}%`;
-            });
-        }
-
-        // 更新概览
-        function updateOverview() {
-            const classTotal = Object.values(config.class).reduce((sum, stage) => sum + stage.total, 0);
-            const classCompleted = Object.values(config.class).reduce((sum, stage) => sum + stage.completed, 0);
-            
-            const duolingoTotal = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.total, 0);
-            const duolingoCompleted = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.completed, 0);
-            
-            const totalProgress = Math.round(((classCompleted + duolingoCompleted) / (classTotal + duolingoTotal)) * 100);
-            
-            document.getElementById('totalProgress').textContent = `${totalProgress}%`;
-            document.getElementById('streakDays').textContent = streakCount;
-            document.getElementById('totalDays').textContent = totalStudyDays;
-            
-            // 计算预计剩余天数
-            const remainingClass = classTotal - classCompleted;
-            const remainingDuolingo = duolingoTotal - duolingoCompleted;
-            
-            // 简单估算：上课每天1单元，多邻国平均每天2单元
-            const estimatedDays = Math.max(remainingClass, Math.ceil(remainingDuolingo / 2));
-            document.getElementById('remainingDays').textContent = estimatedDays > 0 ? estimatedDays : '完成!';
-        }
-
-        // 打卡功能
-        async function checkin(type, action) {
-            const today = new Date().toDateString();
-            const buttonId = `${type}${action.charAt(0).toUpperCase() + action.slice(1)}Btn`;
-            const button = document.getElementById(buttonId);
-            
-            if (button.classList.contains('completed')) {
+            if (!targetDate) {
+                dailyTargetDiv.style.display = 'none';
                 return;
             }
             
-            // 标记按钮为已完成
-            button.classList.add('completed');
-            button.disabled = true;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(targetDate);
+            target.setHours(0, 0, 0, 0);
             
-            // 记录打卡
-            if (!dailyCheckins[today]) {
-                dailyCheckins[today] = {};
+            const timeDiff = target.getTime() - today.getTime();
+            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+            
+            if (daysDiff <= 0) {
+                dailyTargetText.textContent = '目标日期已过期，请设置新的目标日期';
+                dailyTargetDiv.style.display = 'block';
+                return;
             }
-            dailyCheckins[today][`${type}_${action}`] = true;
             
-            // 如果是学习打卡，增加进度
-            if (action === 'study') {
-                updateStudyProgress(type);
+            const stats = calculateStats();
+            const dailyTarget = Math.ceil(stats.remainingUnits / daysDiff);
+            
+            const today日期 = new Date().toLocaleDateString('zh-CN');
+            
+            if (stats.remainingUnits === 0) {
+                dailyTargetText.textContent = '🎉 恭喜！您已完成所有学习单元！';
+            } else if (daysDiff === 1) {
+                dailyTargetText.textContent = `今天是最后一天！还需完成 ${stats.remainingUnits} 个单元`;
+            } else {
+                dailyTargetText.textContent = `距离目标还有 ${daysDiff} 天，建议每天完成 ${dailyTarget} 个单元（今天：${today日期}）`;
             }
             
-            // 检查是否完成了今日所有任务
-            checkDailyCompletion();
-            
-            localStorage.setItem(`lastCheckinDate_${currentUser}`, today);
-            await saveUserData();
-            updateAllProgress();
+            dailyTargetDiv.style.display = 'block';
         }
 
-        // 更新学习进度
-        function updateStudyProgress(type) {
-            if (type === 'class') {
-                // 按顺序完成上课阶段
-                if (config.class.phonics.completed < config.class.phonics.total) {
-                    config.class.phonics.completed++;
-                } else if (config.class.a1.completed < config.class.a1.total) {
-                    config.class.a1.completed++;
-                } else if (config.class.a2.completed < config.class.a2.total) {
-                    config.class.a2.completed++;
-                } else if (config.class.b1.completed < config.class.b1.total) {
-                    config.class.b1.completed++;
+        // 保存学习目标
+        function saveGoal() {
+            if (!authToken) {
+                showPasswordModal('saveGoal');
+                return;
+            }
+            saveGoalAPI();
+        }
+
+        // 保存学习目标API调用
+        async function saveGoalAPI() {
+            const targetDate = document.getElementById('targetDate').value;
+            
+            if (!targetDate) {
+                showError('请选择目标完成日期');
+                return;
+            }
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const target = new Date(targetDate);
+            target.setHours(0, 0, 0, 0);
+            
+            if (target <= today) {
+                showError('目标日期必须是未来的日期');
+                return;
+            }
+            
+            try {
+                await apiCall('/api/settings', 'POST', {
+                    targetDate,
+                    levelConfig
+                });
+                
+                updateDailyTarget();
+                showSuccess('学习目标保存成功！');
+            } catch (error) {
+                showError('保存目标失败: ' + error.message);
+            }
+        }
+
+        // 更新等级配置
+        function updateLevels() {
+            if (!authToken) {
+                showPasswordModal('updateLevels');
+                return;
+            }
+            updateLevelsAPI();
+        }
+
+        // 更新等级配置API调用
+        async function updateLevelsAPI() {
+            const newConfig = {};
+            for (let i = 1; i <= 5; i++) {
+                const input = document.getElementById(`level${i}`);
+                const value = parseInt(input.value);
+                if (value > 0 && value <= 999) {
+                    newConfig[i] = value;
+                } else {
+                    showError(`等级${i}的单元数必须在1-999之间`);
+                    return;
                 }
-            } else if (type === 'duolingo') {
-                // 按顺序完成多邻国阶段
-                if (config.duolingo.a1.completed < config.duolingo.a1.total) {
-                    config.duolingo.a1.completed += Math.random() < 0.5 ? 1 : 2;
-                    config.duolingo.a1.completed = Math.min(config.duolingo.a1.completed, config.duolingo.a1.total);
-                } else if (config.duolingo.a2.completed < config.duolingo.a2.total) {
-                    config.duolingo.a2.completed += Math.random() < 0.5 ? 1 : 2;
-                    config.duolingo.a2.completed = Math.min(config.duolingo.a2.completed, config.duolingo.a2.total);
-                } else if (config.duolingo.b1.completed < config.duolingo.b1.total) {
-                    config.duolingo.b1.completed += Math.random() < 0.5 ? 1 : 2;
-                    config.duolingo.b1.completed = Math.min(config.duolingo.b1.completed, config.duolingo.b1.total);
-                } else if (config.duolingo.b2.completed < config.duolingo.b2.total) {
-                    config.duolingo.b2.completed += 4;
-                    config.duolingo.b2.completed = Math.min(config.duolingo.b2.completed, config.duolingo.b2.total);
-                }
+            }
+            
+            try {
+                const targetDate = document.getElementById('targetDate').value;
+                await apiCall('/api/settings', 'POST', {
+                    levelConfig: newConfig,
+                    targetDate: targetDate || null
+                });
+                
+                levelConfig = newConfig;
+                renderContent();
+                updateDailyTarget();
+                showSuccess('配置更新成功！');
+            } catch (error) {
+                showError('更新配置失败: ' + error.message);
             }
         }
 
-        // 检查每日完成情况
-        function checkDailyCompletion() {
-            const today = new Date().toDateString();
-            const todayCheckins = dailyCheckins[today] || {};
+        // 重置进度
+        function resetProgress() {
+            if (!authToken) {
+                showPasswordModal('resetProgress');
+                return;
+            }
             
-            const allCompleted = todayCheckins.class_study && todayCheckins.class_review && 
-                               todayCheckins.duolingo_study && todayCheckins.duolingo_review;
-            
-            if (allCompleted) {
-                streakCount++;
-                totalStudyDays++;
-                showAchievement('恭喜完成今日所有学习任务!');
+            if (confirm('确定要重置所有学习进度吗？此操作不可撤销！')) {
+                resetProgressAPI();
             }
         }
 
-        // 显示成就
-        function showAchievement(message) {
-            const achievement = document.createElement('div');
-            achievement.className = 'achievement';
-            achievement.textContent = message;
-            achievement.style.position = 'fixed';
-            achievement.style.top = '50%';
-            achievement.style.left = '50%';
-            achievement.style.transform = 'translate(-50%, -50%)';
-            achievement.style.zIndex = '9999';
-            achievement.style.padding = '20px';
-            achievement.style.borderRadius = '15px';
-            achievement.style.fontSize = '1.2em';
+        // 重置进度API调用
+        async function resetProgressAPI() {
+            try {
+                await apiCall('/api/progress', 'DELETE');
+                progressData = {};
+                renderContent();
+                updateDailyTarget();
+                showSuccess('进度重置成功！');
+            } catch (error) {
+                showError('重置进度失败: ' + error.message);
+            }
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
             
-            document.body.appendChild(achievement);
+            const container = document.querySelector('.container');
+            container.insertBefore(errorDiv, container.firstChild);
             
             setTimeout(() => {
-                achievement.remove();
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        // 显示成功信息
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            
+            const container = document.querySelector('.container');
+            container.insertBefore(successDiv, container.firstChild);
+            
+            setTimeout(() => {
+                successDiv.remove();
             }, 3000);
         }
 
-        // 检查日期重置
-        function checkDailyReset() {
-            const today = new Date().toDateString();
-            const lastCheckin = localStorage.getItem(`lastCheckinDate_${currentUser}`);
-            
-            if (lastCheckin !== today) {
-                // 重置今日打卡状态
-                const todayButtons = document.querySelectorAll('.checkin-btn');
-                todayButtons.forEach(btn => {
-                    btn.classList.remove('completed');
-                    btn.disabled = false;
-                });
-            } else {
-                // 恢复今日打卡状态
-                const todayCheckins = dailyCheckins[today] || {};
-                Object.keys(todayCheckins).forEach(checkinType => {
-                    const [type, action] = checkinType.split('_');
-                    const buttonId = `${type}${action.charAt(0).toUpperCase() + action.slice(1)}Btn`;
-                    const button = document.getElementById(buttonId);
-                    if (button) {
-                        button.classList.add('completed');
-                        button.disabled = true;
-                    }
-                });
+        // 显示模态框错误
+        function showModalError(errorDiv, message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // 监听输入框变化
+        document.getElementById('targetDate').addEventListener('change', updateDailyTarget);
+
+        // 监听回车键
+        document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                verifyPassword();
             }
-        }
+        });
 
-        // 初始化图表
-        function initCharts() {
-            try {
-                const ctx1 = document.getElementById('progressChart');
-                const ctx2 = document.getElementById('dailyChart');
-                
-                if (!ctx1 || !ctx2) {
-                    console.warn('Chart canvases not found, retrying in 100ms');
-                    setTimeout(initCharts, 100);
-                    return;
-                }
-
-                if (typeof Chart === 'undefined') {
-                    console.warn('Chart.js not loaded yet, retrying in 100ms');
-                    setTimeout(initCharts, 100);
-                    return;
-                }
-
-                const ctx1Context = ctx1.getContext('2d');
-                const ctx2Context = ctx2.getContext('2d');
-                
-                progressChart = new Chart(ctx1Context, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['上课', '多邻国'],
-                        datasets: [{
-                            data: [0, 0],
-                            backgroundColor: ['#4a90e2', '#ff9800'],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-                
-                dailyChart = new Chart(ctx2Context, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: '每日打卡次数',
-                            data: [],
-                            borderColor: '#4a90e2',
-                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 4
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
-                
-                console.log('Charts initialized successfully');
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-                const chartContainers = document.querySelectorAll('.chart-container');
-                chartContainers.forEach(container => {
-                    container.style.display = 'none';
-                });
+        document.getElementById('setupPasswordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('confirmPasswordInput').focus();
             }
-        }
+        });
 
-        // 更新图表
-        function updateCharts() {
-            try {
-                if (!progressChart || !dailyChart) {
-                    console.warn('Charts not initialized, skipping update');
-                    return;
-                }
-
-                // 更新进度对比图
-                const classTotal = Object.values(config.class).reduce((sum, stage) => sum + stage.total, 0);
-                const classCompleted = Object.values(config.class).reduce((sum, stage) => sum + stage.completed, 0);
-                const duolingoTotal = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.total, 0);
-                const duolingoCompleted = Object.values(config.duolingo).reduce((sum, stage) => sum + stage.completed, 0);
-                
-                if (progressChart.data && progressChart.data.datasets && progressChart.data.datasets[0]) {
-                    progressChart.data.datasets[0].data = [
-                        Math.round((classCompleted / classTotal) * 100),
-                        Math.round((duolingoCompleted / duolingoTotal) * 100)
-                    ];
-                    progressChart.update('none');
-                }
-                
-                // 更新每日打卡图表
-                const last7Days = [];
-                const checkinCounts = [];
-                const today = new Date();
-                
-                for (let i = 6; i >= 0; i--) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - i);
-                    const dateStr = date.toDateString();
-                    const monthDay = `${date.getMonth() + 1}/${date.getDate()}`;
-                    
-                    last7Days.push(monthDay);
-                    
-                    const dayCheckins = dailyCheckins[dateStr] || {};
-                    const count = Object.keys(dayCheckins).length;
-                    checkinCounts.push(count);
-                }
-                
-                if (dailyChart.data && dailyChart.data.datasets && dailyChart.data.datasets[0]) {
-                    dailyChart.data.labels = last7Days;
-                    dailyChart.data.datasets[0].data = checkinCounts;
-                    dailyChart.update('none');
-                }
-            } catch (error) {
-                console.error('Error updating charts:', error);
-            }
-        }
-
-        // 设置相关函数
-        function openSettings() {
-            // 加载当前进度到设置界面
-            document.getElementById('classPhonics').value = config.class.phonics.completed;
-            document.getElementById('classA1').value = config.class.a1.completed;
-            document.getElementById('classA2').value = config.class.a2.completed;
-            document.getElementById('classB1').value = config.class.b1.completed;
-            
-            document.getElementById('duolingoA1').value = config.duolingo.a1.completed;
-            document.getElementById('duolingoA2').value = config.duolingo.a2.completed;
-            document.getElementById('duolingoB1').value = config.duolingo.b1.completed;
-            document.getElementById('duolingoB2').value = config.duolingo.b2.completed;
-            
-            document.getElementById('settingsModal').style.display = 'block';
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-
-        async function saveSettings() {
-            // 保存上课进度
-            config.class.phonics.completed = Math.min(parseInt(document.getElementById('classPhonics').value) || 0, 5);
-            config.class.a1.completed = Math.min(parseInt(document.getElementById('classA1').value) || 0, 36);
-            config.class.a2.completed = Math.min(parseInt(document.getElementById('classA2').value) || 0, 35);
-            config.class.b1.completed = Math.min(parseInt(document.getElementById('classB1').value) || 0, 48);
-            
-            // 保存多邻国进度
-            config.duolingo.a1.completed = Math.min(parseInt(document.getElementById('duolingoA1').value) || 0, 53);
-            config.duolingo.a2.completed = Math.min(parseInt(document.getElementById('duolingoA2').value) || 0, 46);
-            config.duolingo.b1.completed = Math.min(parseInt(document.getElementById('duolingoB1').value) || 0, 100);
-            config.duolingo.b2.completed = Math.min(parseInt(document.getElementById('duolingoB2').value) || 0, 73);
-            
-            await saveUserData();
-            updateAllProgress();
-            closeSettings();
-            
-            showAchievement('初始进度设置已保存!');
-        }
-
-        // 点击模态框外部关闭
-        window.onclick = function(event) {
-            const modal = document.getElementById('settingsModal');
-            if (event.target === modal) {
-                closeSettings();
-            }
-        }
-
-        // 键盘快捷键
-        document.addEventListener('keydown', function(event) {
-            if (event.ctrlKey || event.metaKey) {
-                switch(event.key) {
-                    case 's':
-                        event.preventDefault();
-                        if (currentUser) openSettings();
-                        break;
-                }
-            }
-            
-            // ESC键关闭模态框
-            if (event.key === 'Escape') {
-                closeSettings();
+        document.getElementById('confirmPasswordInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                setupPassword();
             }
         });
 
         // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            initApp();
-        });
-
-        // 如果页面已经加载完成，直接初始化
-        if (document.readyState !== 'loading') {
-            initApp();
-        }
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
